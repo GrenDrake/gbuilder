@@ -80,7 +80,7 @@ void Lexer::doLex() {
             while (here() != '/' || prev() != '*') {
                 next();
                 if (here() == 0) {
-                    errors.add(sourceFile, sline, scol, "unterminated block comment /* */");
+                    errors.add(ErrorLogger::Error, sourceFile, sline, scol, "unterminated block comment /* */");
                     break;
                 }
             }
@@ -177,7 +177,7 @@ void Lexer::doLex() {
         } else {
             std::stringstream ss;
             ss << "Unexpected character '" << (char)here() << "' (" << here() << ").";
-            errors.add(sourceFile, cLine, cColumn, ss.str());
+            errors.add(ErrorLogger::Error, sourceFile, cLine, cColumn, ss.str());
             next();
         }
     }
@@ -244,7 +244,7 @@ void Lexer::doString() {
     while (here() != 0 && here() != '"') {
         next();
         if (here() == 0) {
-            errors.add(sourceFile, t.line, t.column, "unterminated string");
+            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated string");
         }
     }
     
@@ -261,7 +261,7 @@ void Lexer::doVocab() {
     while (here() != 0 && here() != '$') {
         next();
         if (here() == 0) {
-            errors.add(sourceFile, t.line, t.column, "unterminated vocab word");
+            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated vocab word");
         }
     }
     

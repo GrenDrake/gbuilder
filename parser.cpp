@@ -38,7 +38,7 @@ bool Parser::expect(TokenType type) {
     }
 
     if (!here()) {
-        addError("Unexpected EOF");
+        addError(ErrorLogger::Error, "Unexpected EOF");
         return false;
     }
 
@@ -48,7 +48,7 @@ bool Parser::expect(TokenType type) {
        << " but found "
        << tokenTypeName(here()->type)
        << ".";
-    addError(ss.str());
+    addError(ErrorLogger::Error, ss.str());
 
     return false;
 }
@@ -75,7 +75,7 @@ bool Parser::expect(const std::string &text) {
     }
 
     if (!here()) {
-        addError("Unexpected EOF");
+        addError(ErrorLogger::Error, "Unexpected EOF");
         return false;
     }
 
@@ -83,7 +83,7 @@ bool Parser::expect(const std::string &text) {
     ss << "expected keyword \""
        << text
        << "\".";
-    addError(ss.str());
+    addError(ErrorLogger::Error, ss.str());
 
     return false;
 }
@@ -111,10 +111,10 @@ const Token* Parser::next() {
     return here();
 }
 
-void Parser::addError(const std::string &text) {
+void Parser::addError(ErrorLogger::Type type, const std::string &text) {
     if (!here()) {
-        errors.add("<unknown>", 0, 0, text);
+        errors.add(type, "<unknown>", 0, 0, text);
     } else {
-        errors.add(here()->file, here()->line, here()->column, text);
+        errors.add(type, here()->file, here()->line, here()->column, text);
     }
 }

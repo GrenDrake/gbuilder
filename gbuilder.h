@@ -66,23 +66,38 @@ private:
 
 class ErrorLogger {
 public:
+    enum Type {
+        Error, Warning, Notice
+    };
+    
     class Message {
     public:
-        Message(const std::string &file, int line, int column, const std::string &message)
-        : file(file), line(line), column(column), message(message) {
+        Message(Type type, const std::string &file, int line, int column, const std::string &message)
+        : type(type), file(file), line(line), column(column), message(message) {
         }
         std::string format() const;
+        const Type type;
         const std::string file;
         const int line, column;
         const std::string message;
     };
     
-    void add(const std::string &file, int line, int column, const std::string &message);
+    ErrorLogger()
+    : theErrorCount(0), theWarningCount(0) {
+    }
+    
+    void add(Type type, const std::string &file, int line, int column, const std::string &message);
     std::list<Message>::iterator begin() {
         return errors.begin();
     }
     unsigned count() const {
         return errors.size();
+    }
+    unsigned errorCount() const {
+        return theErrorCount;
+    }
+    unsigned warningCount() const {
+        return theWarningCount;
     }
     std::list<Message>::iterator end() {
         return errors.end();
@@ -92,6 +107,7 @@ public:
     }
 private:
     std::list<Message> errors;
+    int theErrorCount, theWarningCount;
 };
 
 class GameData {
@@ -151,7 +167,7 @@ private:
     const Token* here();
     const Token* next();
     
-    void addError(const std::string &text);
+    void addError(ErrorLogger::Type type, const std::string &text);
 
     int current;
     ErrorLogger &errors;
