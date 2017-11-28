@@ -1,0 +1,42 @@
+object testobj {
+    prop_name value;
+}
+
+object more_test extends testobj {
+    vocab $this$ $is$ $the$ $object$;
+    empty_arr array(8);
+}
+
+object Vector {
+    function init() {
+    }
+}
+
+// this is a test
+/* more testing // */
+
+function main(arg1, arg2?) {
+    local var1, var2 = "hello\n";
+    
+    var1 = (1 + 2 * 3) / 4 - 5 ^ 6 % 7;
+    var1 += 8;
+    if (var1 == 8) {
+    } elif (var1 != 9 || var1 != 3) {
+    }
+    var1 < 10;
+    var1 >= 11;
+    var1 = true;
+    var1 = false;
+    -var1;
+    !var1;
+    ++var1++;
+    --var1--;
+    
+    var2 = new Vector();
+    
+    for (var3 = 0; var3 < 8 && var3 != 66; ++var3) ;
+    while(false) { }
+    do {
+    } while (true);
+    
+}
