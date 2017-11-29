@@ -1,10 +1,13 @@
 
 
-function main() {
-
+function main(arg) {
+    local pppu, efghj;
     asm {
         fred 6 9;
         tom sp;
+    }
+    {
+        local f86;
     }
     asm sausage;
     {
@@ -20,5 +23,5 @@ function main() {
 
 }
 
-function glk_setup() {
+function glk_setup(this, is, good) {
 }

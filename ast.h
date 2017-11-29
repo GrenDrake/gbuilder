@@ -3,6 +3,15 @@
 
 class AstWalker;
 
+class SymbolDef {
+public:
+    SymbolDef(const std::string &name)
+    : name(name) {
+    }
+    std::string name;
+    int value;
+};
+
 class StatementDef {
 public:
     virtual ~StatementDef() {
@@ -40,13 +49,10 @@ public:
     std::vector<AsmOperand*> operands;
 };
 
-class LocalDef {
+class SymbolTable {
 public:
-    LocalDef(const std::string &name)
-    : name(name) {
-    }
-    std::string name;
-    int number;
+    SymbolTable *parent;
+    std::vector<SymbolDef> symbols;
 };
 
 class CodeBlock : public StatementDef {
@@ -57,7 +63,7 @@ public:
         }
     }
     virtual void accept(AstWalker *walker);
-    std::vector<LocalDef> locals;
+    SymbolTable locals;
     std::vector<StatementDef*> statements;
 };
 
@@ -67,9 +73,9 @@ public:
         delete code;
     }
     void accept(AstWalker *walker);
+    SymbolTable args;
     std::string name;
     int localCount;
-    std::vector<LocalDef> locals;
     CodeBlock *code;
 };
 

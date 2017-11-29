@@ -33,8 +33,26 @@ FunctionDef* Parser::doFunction() {
     newfunc->name = here()->vText;
     next();
     expectAdv(OpenParan);
+    if (matches(Identifier)) {
+        while (true) {
+            expect(Identifier);
+            SymbolDef sym(here()->vText);
+            newfunc->args.symbols.push_back(sym);
+            next();
+            if (matches(Comma)) {
+                next();
+            } else {
+                break;
+            }
+        }
+    }
     expectAdv(CloseParan);
     newfunc->code = doCodeBlock();
+    if (!newfunc->code) {
+        delete newfunc;
+        return nullptr;
+    }
+    newfunc->code->locals.parent = &newfunc->args;
     return newfunc;
 }
 
@@ -51,6 +69,9 @@ CodeBlock* Parser::doCodeBlock() {
         StatementDef *stmt = nullptr;
         if (here()->type == OpenBrace) {
             stmt = doCodeBlock();
+            ((CodeBlock*)stmt)->locals.parent = &code->locals;
+        } else if (matches("local")) {
+            if (!doLocalsStmt(code)) return nullptr;
         } else if (matches("asm")) {
             stmt = doAsmBlock();
         } else {
@@ -67,6 +88,24 @@ CodeBlock* Parser::doCodeBlock() {
     }
     next();
     return code;
+}
+
+bool Parser::doLocalsStmt(CodeBlock *code) {
+    if (!expect("local")) return false;
+
+    while (true) {
+        expect(Identifier);
+        SymbolDef sym(here()->vText);
+        code->locals.symbols.push_back(sym);
+        next();
+        if (matches(Comma)) {
+            next();
+        } else {
+            break;
+        }
+    }
+    if (!expectAdv(Semicolon)) return false;
+    return true;
 }
 
 StatementDef* Parser::doAsmBlock() {

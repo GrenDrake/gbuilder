@@ -171,6 +171,7 @@ public:
 private:
     FunctionDef* doFunction();
     CodeBlock* doCodeBlock();
+    bool doLocalsStmt(CodeBlock *code);
     StatementDef* doAsmBlock();
     StatementDef* doAsmStatement();
     AsmOperand* doAsmOperand();

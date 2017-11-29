@@ -21,7 +21,8 @@ public:
     }
     virtual void visit(CodeBlock *stmt) {
         spaces();
-        std::cout << "BEGIN\n";
+        std::cout << "BEGIN  ";
+        printSymbols(stmt->locals);
         ++depth;
         for (StatementDef *s : stmt->statements) {
             s->accept(this);
@@ -32,7 +33,8 @@ public:
     }
     virtual void visit(FunctionDef *stmt) {
         depth = 0;
-        std::cout << "FUNCTION " << stmt->name << "\n";
+        std::cout << "\nFUNCTION " << stmt->name << ' ';
+        printSymbols(stmt->args);
         if (stmt->code) {
             stmt->code->accept(this);
         } else {
@@ -41,6 +43,13 @@ public:
     }
     
 private:
+    void printSymbols(SymbolTable &symbols) {
+        std::cout << "(" << symbols.symbols.size() << ":";
+        for (SymbolDef &s : symbols.symbols) {
+            std::cout << " ~" << s.name << '~';
+        }
+        std::cout << " )\n";
+    }
     void spaces() const {
         for (int i = 0; i < depth; ++i) {
             std::cout << "   ";
