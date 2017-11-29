@@ -6,6 +6,8 @@
 
 #include "gbuilder.h"
 
+void printAST(GameData &gd);
+
 void showErrors(ErrorLogger &errors) {
     for (auto m : errors) {
         std::cerr << m.format() << "\n";
@@ -42,6 +44,8 @@ int main() {
         showErrors(errors);
         return 1;
     }
+
+    printAST(gamedata);
 
     /*
     for (Token &t : tokens) {

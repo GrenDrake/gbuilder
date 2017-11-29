@@ -1,6 +1,9 @@
 #include <list>
+#include <set>
 #include <string>
 #include <vector>
+
+#include "ast.h"
 
 enum TokenType {
     Identifier,
@@ -112,6 +115,15 @@ private:
 
 class GameData {
 public:
+    ~GameData() {
+        for (FunctionDef *f : functions) {
+            delete f;
+        }
+    }
+
+    std::list<FunctionDef*> functions;
+    std::set<std::string> vocabRaw;
+
 private:
 };
 
@@ -157,7 +169,11 @@ public:
     
     void doParse();
 private:
-    void doFunction();
+    FunctionDef* doFunction();
+    CodeBlock* doCodeBlock();
+    StatementDef* doAsmBlock();
+    StatementDef* doAsmStatement();
+    AsmOperand* doAsmOperand();
 
     bool expect(TokenType type);
     bool expectAdv(TokenType type);

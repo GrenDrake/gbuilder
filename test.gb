@@ -1,8 +1,24 @@
 
 
 function main() {
-    local var1, var2;
-    
-        
-    
+
+    asm {
+        fred 6 9;
+        tom sp;
+    }
+    asm sausage;
+    {
+        asm goj 8 sp 8 sp;
+    }
+/*
+    asm glk 0 0;
+    asm {
+        glk 0 0;
+        glk 0 0;
+    }
+    */
+
+}
+
+function glk_setup() {
 }

@@ -6,12 +6,14 @@
 
 void Parser::doParse() {
 
-    doFunction();
     while (here()) {
         if (matches("function")) {
-            doFunction();
+            FunctionDef *newfunc = doFunction();
+            if (newfunc) {
+                gamedata.functions.push_back(newfunc);
+            }
         } else {
-            std::cout << here()->file 
+            std::cout << here()->file
                       << ":" 
                       << here()->line 
                       << ":" 
@@ -23,14 +25,116 @@ void Parser::doParse() {
     }
 }
 
-void Parser::doFunction() {
-    if (!expect("function")) return;
-    if (!expect(Identifier)) return;
-    const std::string &funcname = here()->vText;
+FunctionDef* Parser::doFunction() {
+    if (!expect("function")) return nullptr;
+    if (!expect(Identifier)) return nullptr;
+    
+    FunctionDef *newfunc = new FunctionDef;
+    newfunc->name = here()->vText;
     next();
     expectAdv(OpenParan);
     expectAdv(CloseParan);
+    newfunc->code = doCodeBlock();
+    return newfunc;
 }
+
+CodeBlock* Parser::doCodeBlock() {
+    if (!expectAdv(OpenBrace)) return nullptr;
+    
+    CodeBlock *code = new CodeBlock;
+    while (!matches(CloseBrace)) {
+        if (here() == nullptr) {
+            delete code;
+            return nullptr;
+        }
+        
+        StatementDef *stmt = nullptr;
+        if (here()->type == OpenBrace) {
+            stmt = doCodeBlock();
+        } else if (matches("asm")) {
+            stmt = doAsmBlock();
+        } else {
+            std::stringstream ss;
+            ss << "unexpected token ";
+            ss << tokenTypeName(here()->type);
+            ss << ".";
+            addError(ErrorLogger::Error, ss.str());
+            next();
+        }
+        if (stmt) {
+            code->statements.push_back(stmt);
+        }
+    }
+    next();
+    return code;
+}
+
+StatementDef* Parser::doAsmBlock() {
+    if (!expect("asm")) return nullptr;
+    
+    if (!matches(OpenBrace)) {
+        StatementDef *stmt = doAsmStatement();
+        return stmt;
+    }
+
+    if (!expectAdv(OpenBrace)) return nullptr;
+    CodeBlock *code = new CodeBlock;
+    
+    
+    while (!matches(CloseBrace)) {
+        if (here() == nullptr) {
+            delete code;
+            return nullptr;
+        }
+        
+        StatementDef *stmt = doAsmStatement();
+        if (stmt) {
+            code->statements.push_back(stmt);
+        }
+    }
+    next();
+    return code;
+}
+
+StatementDef* Parser::doAsmStatement() {
+    if (!expect(Identifier)) return nullptr;
+    AsmStatement *stmt = new AsmStatement;
+    stmt->opcode = here()->vText;
+    next();
+
+    while (!matches(Semicolon)) {
+        AsmOperand *op = doAsmOperand();
+        if (op) {
+            stmt->operands.push_back(op);
+        }
+    }
+
+    if (!expectAdv(Semicolon)) return nullptr;
+    return stmt;
+}
+
+AsmOperand* Parser::doAsmOperand() {
+    switch(here()->type) {
+        case Integer: {
+            AsmOperandInteger *op = new AsmOperandInteger;
+            op->value = here()->vInteger;
+            next();
+            return op;
+        }
+        case Identifier: {
+            if (here()->vText == "sp") {
+                AsmOperandStack *op = new AsmOperandStack;
+                next();
+                return op;
+            }
+        }
+        default:
+            addError(ErrorLogger::Error, "bad operand type");
+            next();
+            return nullptr;
+    }
+}
+
 
 bool Parser::expect(TokenType type) {
     if (matches(type)) {
@@ -87,6 +191,7 @@ bool Parser::expect(const std::string &text) {
 
     return false;
 }
+
 bool Parser::matches(const std::string &text) {
     if (!here()) {
         return false;
