@@ -147,6 +147,7 @@ private:
     void doVocab();
 
     bool isIdentifier(int c, bool isInitial = false) const;
+    void unescape(int line, int column, std::string &text);
 
     int here() const;
     int next();

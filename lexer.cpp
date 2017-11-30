@@ -244,7 +244,7 @@ void Lexer::doCharLiteral() {
 
     next();
     int start = current;
-    while (here() != 0 && here() != '\'') {
+    while (here() != 0 && (here() != '\'' || prev() == '\\')) {
         next();
         if (here() == 0) {
             errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated character literal");
@@ -252,6 +252,7 @@ void Lexer::doCharLiteral() {
     }
     
     std::string rawText = source.substr(start, current-start);
+    unescape(t.line, t.column, rawText);
     if (rawText.size() == 0) {
         errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "empty character literal");
     } else {
@@ -269,7 +270,7 @@ void Lexer::doString() {
 
     next();
     int start = current;
-    while (here() != 0 && here() != '"') {
+    while (here() != 0 && (here() != '"' || prev() == '\\')) {
         next();
         if (here() == 0) {
             errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated string");
@@ -277,6 +278,7 @@ void Lexer::doString() {
     }
     
     t.vText = source.substr(start, current-start);
+    unescape(t.line, t.column, t.vText);
     tokens.push_back(std::move(t));
     next();
 }
@@ -306,6 +308,38 @@ bool Lexer::isIdentifier(int c, bool isInitial) const {
         return true;
     }
     return false;
+}
+
+void Lexer::unescape(int line, int column, std::string &text) {
+    for (unsigned i = 0; i < text.size(); ++i) {
+        if (text[i] != '\\') {
+            continue;
+        }
+        
+        if (i + 1 >= text.size()) {
+            errors.add(ErrorLogger::Error, sourceFile, line, column, "incomplete escape at end of string");
+            continue;
+        }
+        
+        switch(text[i+1]) {
+            case '\\':
+            case '\'':
+            case '"':
+                text[i] = text[i+1];
+                break;
+            case 'n':
+                text[i] = '\n';
+                break;
+            case 't':
+                text[i] = '\t';
+                break;
+            default:
+                errors.add(ErrorLogger::Error, sourceFile, line, column, "unknown string escape");
+                text[i] = '?';
+                break;
+        }
+        text.erase(i+1, 1);
+    }
 }
 
 int Lexer::here() const {
