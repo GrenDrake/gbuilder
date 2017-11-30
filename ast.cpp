@@ -6,6 +6,10 @@ void AsmOperandInteger::accept(AstWalker *walker) {
     walker->visit(this);
 }
 
+void AsmOperandIdentifier::accept(AstWalker *walker) {
+    walker->visit(this);
+}
+
 void AsmOperandStack::accept(AstWalker *walker) {
     walker->visit(this);
 }

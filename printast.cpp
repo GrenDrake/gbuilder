@@ -8,6 +8,9 @@ public:
     virtual void visit(AsmOperandInteger *stmt) {
         std::cout << " i:" << stmt->value;
     }
+    virtual void visit(AsmOperandIdentifier *stmt) {
+        std::cout << " s:" << stmt->value;
+    }
     virtual void visit(AsmOperandStack *stmt) {
         std::cout << " SP";
     }

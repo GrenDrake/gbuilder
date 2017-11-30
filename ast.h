@@ -32,6 +32,12 @@ public:
     int value;
 };
 
+class AsmOperandIdentifier : public AsmOperand {
+public:
+    virtual void accept(AstWalker *walker);
+    std::string value;
+};
+
 class AsmOperandStack : public AsmOperand {
 public:
     virtual void accept(AstWalker *walker);
@@ -82,6 +88,7 @@ public:
 class AstWalker {
 public:
     virtual void visit(AsmOperandInteger *stmt) = 0;
+    virtual void visit(AsmOperandIdentifier *stmt) = 0;
     virtual void visit(AsmOperandStack *stmt) = 0;
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(CodeBlock *stmt) = 0;

@@ -165,6 +165,11 @@ AsmOperand* Parser::doAsmOperand() {
                 AsmOperandStack *op = new AsmOperandStack;
                 next();
                 return op;
+            } else {
+                AsmOperandIdentifier *op = new AsmOperandIdentifier;
+                op->value = here()->vText;
+                next();
+                return op;
             }
         }
         default:
