@@ -193,3 +193,17 @@ private:
     GameData &gamedata;
     const std::vector<Token> &tokens;
 };
+
+class AsmCode {
+public:
+    AsmCode(const char *name, int opcode, int operands, bool relative = false)
+    : name(name), opcode(opcode), operands(operands), relative(relative) {
+    }
+    
+    const char *name;
+    int opcode;
+    int operands;
+    bool relative;
+};
+
+const AsmCode& opcodeByName(const std::string &name);

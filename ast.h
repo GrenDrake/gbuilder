@@ -51,7 +51,9 @@ public:
         }
     }
     virtual void accept(AstWalker *walker);
-    std::string opcode;
+    std::string opname;
+    int opcode;
+    bool isRelative;
     std::vector<AsmOperand*> operands;
 };
 

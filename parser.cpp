@@ -138,14 +138,26 @@ StatementDef* Parser::doAsmBlock() {
 StatementDef* Parser::doAsmStatement() {
     if (!expect(Identifier)) return nullptr;
     AsmStatement *stmt = new AsmStatement;
-    stmt->opcode = here()->vText;
+    stmt->opname = here()->vText;
     next();
+    
+    const AsmCode &ac = opcodeByName(stmt->opname);
+    if (ac.name == nullptr) {
+        addError(ErrorLogger::Error, "unknown assembly mnemonic");
+    } else {
+        stmt->opcode = ac.opcode;
+        stmt->isRelative = ac.relative;
+    }
 
     while (!matches(Semicolon)) {
         AsmOperand *op = doAsmOperand();
         if (op) {
             stmt->operands.push_back(op);
         }
+    }
+    
+    if (ac.operands != stmt->operands.size()) {
+        addError(ErrorLogger::Error, "bad operand count");
     }
 
     if (!expectAdv(Semicolon)) return nullptr;

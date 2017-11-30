@@ -16,7 +16,7 @@ public:
     }
     virtual void visit(AsmStatement *stmt) {
         spaces();
-        std::cout << "ASM  " << stmt->opcode;
+        std::cout << "ASM  " << stmt->opname << " (" << stmt->opcode << ')';
         for (AsmOperand *op : stmt->operands) {
             op->accept(this);
         }
