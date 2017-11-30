@@ -1,27 +1,38 @@
 
 
-function main(arg) {
-    local pppu, efghj;
+function main() {
+//    glk_setup();
     asm {
-        fred 6 9;
-        tom sp;
+//        streamstr "Hello World!";
+        streamchar 'n';
     }
-    {
-        local f86;
-    }
-    asm sausage;
-    {
-        asm goj 8 sp 8 sp;
-    }
-/*
-    asm glk 0 0;
-    asm {
-        glk 0 0;
-        glk 0 0;
-    }
-    */
-
 }
 
-function glk_setup(this, is, good) {
+function glk_setup() {
+    local res, mainWindow;
+
+    asm {
+        gestalt 4 2 res;
+        jz res bad_start;
+
+        setiosys 2 0;
+
+        // glk_window_open
+        copy sp 0; // rock
+        copy sp 3; // wintype_TextBuffer
+        copy sp 0;
+        copy sp 0;
+        copy sp 0;
+        glk 34 5 mainWindow;
+        jz mainWindow bad_start;
+        
+        // glk_set_window
+        copy sp mainWindow;
+        glk 47 1 0;
+    }
+    
+//    return;
+
+//    bad_start:
+    asm quit;
 }
