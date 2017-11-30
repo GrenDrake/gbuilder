@@ -296,6 +296,7 @@ void Lexer::doVocab() {
     }
     
     t.vText = source.substr(start, current-start);
+    gamedata.vocabRaw.insert(t.vText);
     tokens.push_back(std::move(t));
     next();
 }

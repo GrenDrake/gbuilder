@@ -66,8 +66,15 @@ private:
 
 void printAST(GameData &gd) {
 
+    std::cout << "VOCABULARY: " << gd.vocabRaw.size() << " :";
+    if (!gd.vocabRaw.empty()) {
+        for (const std::string &s : gd.vocabRaw) {
+            std::cout << ' ' << s;
+        }
+    }
+
     PrintAstWalker aw;
-    std::cout << "FUNCTIONS: " << gd.functions.size() << '\n';
+    std::cout << "\n\nFUNCTIONS: " << gd.functions.size() << '\n';
     for (FunctionDef *f : gd.functions) {
         f->accept(&aw);
 //        std::cout << f->name << '\n';

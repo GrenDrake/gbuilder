@@ -42,7 +42,7 @@ int main() {
     parser.doParse();
     if (!errors.empty()) {
         showErrors(errors);
-        return 1;
+     //   return 1;
     }
 
     printAST(gamedata);
