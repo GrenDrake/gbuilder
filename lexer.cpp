@@ -173,6 +173,8 @@ void Lexer::doLex() {
             doNumber();
         } else if (here() == '"') {
             doString();
+        } else if (here() == '\'') {
+            doCharLiteral();
         } else if (here() == '$') {
             doVocab();
         } else {
@@ -234,6 +236,31 @@ void Lexer::doSimpleToken(TokenType type) {
 void Lexer::doSimpleToken2(TokenType type) {
     tokens.push_back(Token(sourceFile, cLine, cColumn, type));
     next();
+    next();
+}
+
+void Lexer::doCharLiteral() {
+    Token t(sourceFile, cLine, cColumn, Integer);
+
+    next();
+    int start = current;
+    while (here() != 0 && here() != '\'') {
+        next();
+        if (here() == 0) {
+            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated character literal");
+        }
+    }
+    
+    std::string rawText = source.substr(start, current-start);
+    if (rawText.size() == 0) {
+        errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "empty character literal");
+    } else {
+        if (rawText.size() > 1) {
+            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "character literal too long");
+        }
+        t.vInteger = rawText[0];
+    }
+    tokens.push_back(std::move(t));
     next();
 }
 

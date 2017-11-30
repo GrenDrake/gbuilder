@@ -138,6 +138,7 @@ public:
         return tokens;
     }
 private:
+    void doCharLiteral();
     void doIdentifier();
     void doNumber();
     void doSimpleToken(TokenType type);
