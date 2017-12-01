@@ -1,7 +1,22 @@
 #include <string>
 #include <vector>
 
-class AstWalker;
+class AsmOperandInteger;
+class AsmOperandIdentifier;
+class AsmOperandStack;
+class AsmStatement;
+class CodeBlock;
+class FunctionDef;
+
+class AstWalker {
+public:
+    virtual void visit(AsmOperandInteger *stmt) = 0;
+    virtual void visit(AsmOperandIdentifier *stmt) = 0;
+    virtual void visit(AsmOperandStack *stmt) = 0;
+    virtual void visit(AsmStatement *stmt) = 0;
+    virtual void visit(CodeBlock *stmt) = 0;
+    virtual void visit(FunctionDef *stmt) = 0;
+};
 
 class SymbolDef {
 public:
@@ -28,19 +43,25 @@ public:
 
 class AsmOperandInteger : public AsmOperand {
 public:
-    virtual void accept(AstWalker *walker);
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
     int value;
 };
 
 class AsmOperandIdentifier : public AsmOperand {
 public:
-    virtual void accept(AstWalker *walker);
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
     std::string value;
 };
 
 class AsmOperandStack : public AsmOperand {
 public:
-    virtual void accept(AstWalker *walker);
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
 };
 
 class AsmStatement : public StatementDef {
@@ -50,7 +71,9 @@ public:
             delete op;
         }
     }
-    virtual void accept(AstWalker *walker);
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
     std::string opname;
     int opcode;
     bool isRelative;
@@ -70,7 +93,9 @@ public:
             delete stmt;
         }
     }
-    virtual void accept(AstWalker *walker);
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
     SymbolTable locals;
     std::vector<StatementDef*> statements;
 };
@@ -80,19 +105,11 @@ public:
     ~FunctionDef() {
         delete code;
     }
-    void accept(AstWalker *walker);
+    void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
     SymbolTable args;
     std::string name;
     int localCount;
     CodeBlock *code;
-};
-
-class AstWalker {
-public:
-    virtual void visit(AsmOperandInteger *stmt) = 0;
-    virtual void visit(AsmOperandIdentifier *stmt) = 0;
-    virtual void visit(AsmOperandStack *stmt) = 0;
-    virtual void visit(AsmStatement *stmt) = 0;
-    virtual void visit(CodeBlock *stmt) = 0;
-    virtual void visit(FunctionDef *stmt) = 0;
 };

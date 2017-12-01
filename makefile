@@ -1,5 +1,5 @@
 CXXFLAGS=-Wall -g -pedantic -std=c++11
-OBJS=main.o lexer.o errorlogger.o parser.o printast.o ast.o asm.o
+OBJS=main.o lexer.o errorlogger.o parser.o printast.o asm.o
 TARGET=~/gbuilder
 
 $(TARGET): $(OBJS)
