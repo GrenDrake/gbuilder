@@ -180,6 +180,7 @@ public:
 private:
     FunctionDef* doFunction();
     CodeBlock* doCodeBlock();
+    LabelStmt* doLabel();
     ReturnDef* doReturn();
     bool doLocalsStmt(CodeBlock *code);
     StatementDef* doAsmBlock();

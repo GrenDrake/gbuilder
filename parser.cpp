@@ -62,6 +62,14 @@ ReturnDef* Parser::doReturn() {
     if (!expectAdv(Semicolon)) return nullptr;
     return new ReturnDef;
 }
+LabelStmt* Parser::doLabel() {
+    if (!expect("label")) return nullptr;
+    if (!expect(Identifier)) return nullptr;
+    const std::string &name = here()->vText;
+    next();
+    if (!expectAdv(Semicolon)) return nullptr;
+    return new LabelStmt(name);
+}
 CodeBlock* Parser::doCodeBlock() {
     if (!expectAdv(OpenBrace)) return nullptr;
     
@@ -80,6 +88,8 @@ CodeBlock* Parser::doCodeBlock() {
             if (!doLocalsStmt(code)) return nullptr;
         } else if (matches("return")) {
             stmt = doReturn();
+        } else if (matches("label")) {
+            stmt = doLabel();
         } else if (matches("asm")) {
             stmt = doAsmBlock();
         } else {
@@ -144,6 +154,8 @@ StatementDef* Parser::doAsmBlock() {
 }
 
 StatementDef* Parser::doAsmStatement() {
+    if (matches("label")) return doLabel();
+
     if (!expect(Identifier)) return nullptr;
     AsmStatement *stmt = new AsmStatement;
     stmt->opname = here()->vText;

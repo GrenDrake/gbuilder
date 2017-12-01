@@ -8,6 +8,7 @@ class AsmStatement;
 class CodeBlock;
 class FunctionDef;
 class ReturnDef;
+class LabelStmt;
 
 class AstWalker {
 public:
@@ -18,6 +19,7 @@ public:
     virtual void visit(CodeBlock *stmt) = 0;
     virtual void visit(FunctionDef *stmt) = 0;
     virtual void visit(ReturnDef *stmt) = 0;
+    virtual void visit(LabelStmt *stmt) = 0;
 };
 
 class SymbolDef {
@@ -89,6 +91,20 @@ public:
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
+};
+
+class LabelStmt : public StatementDef{
+public:
+    LabelStmt(const std::string &name)
+    : name(name) {
+    }
+    virtual ~LabelStmt() {
+    }
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
+    
+    std::string name;
 };
 
 

@@ -48,6 +48,10 @@ public:
         spaces();
         std::cout << "RETURN 0\n";
     }
+    virtual void visit(LabelStmt *stmt) {
+        spaces();
+        std::cout << "LABEL ~" << stmt->name << "~\n";
+    }
 
 private:
     void printSymbols(SymbolTable &symbols) {

@@ -53,6 +53,7 @@ const char* tokenTypeName(TokenType type) {
 static const char *reservedWords[] = {
     "asm",
     "function",
+    "label",
     "local",
     "return"
 };

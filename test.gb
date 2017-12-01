@@ -1,14 +1,5 @@
 
-
 function main() {
-//    glk_setup();
-    asm {
-        streamstr "Hello World!";
-        streamchar '\n';
-    }
-}
-
-function glk_setup() {
     local res, mainWindow;
 
     asm {
@@ -25,14 +16,20 @@ function glk_setup() {
         copy sp 0;
         glk 34 5 mainWindow;
         jz mainWindow bad_start;
+        label testme;
         
         // glk_set_window
         copy sp mainWindow;
         glk 47 1 0;
     }
-    
+
+    asm {
+        streamstr "Hello World!";
+        streamchar '\n';
+    }
+
     return;
 
-//    bad_start:
+    label bad_start;
     asm quit;
 }
