@@ -72,9 +72,16 @@ void printAST(GameData &gd) {
             std::cout << ' ' << s;
         }
     }
+    
+    std::cout << "\n\nSTRINGS: " << gd.stringtable.size() << '\n';
+    if (!gd.stringtable.empty()) {
+        for (auto &s : gd.stringtable) {
+            std::cout << "   " << s.first << ": ~" << s.second << "~\n";
+        }
+    }
 
     PrintAstWalker aw;
-    std::cout << "\n\nFUNCTIONS: " << gd.functions.size() << '\n';
+    std::cout << "\nFUNCTIONS: " << gd.functions.size() << '\n';
     for (FunctionDef *f : gd.functions) {
         f->accept(&aw);
 //        std::cout << f->name << '\n';

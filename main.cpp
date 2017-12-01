@@ -2,11 +2,20 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "gbuilder.h"
 
 void printAST(GameData &gd);
+
+std::string GameData::addString(const std::string &text) {
+    std::stringstream ss;
+    ss << "__str_" << nextString;
+    ++nextString;
+    stringtable[ss.str()] = text;
+    return ss.str();
+}
 
 void showErrors(ErrorLogger &errors) {
     for (auto m : errors) {

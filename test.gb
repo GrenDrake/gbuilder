@@ -3,7 +3,7 @@
 function main() {
 //    glk_setup();
     asm {
-//        streamstr "Hello World!";
+        streamstr "Hello World!";
         streamchar '\n';
     }
 }

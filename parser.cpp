@@ -172,6 +172,13 @@ AsmOperand* Parser::doAsmOperand() {
             next();
             return op;
         }
+        case String: {
+            const std::string &s = gamedata.addString(here()->vText);
+            AsmOperandIdentifier *op = new AsmOperandIdentifier;
+            op->value = s;
+            next();
+            return op;
+        }
         case Identifier: {
             if (here()->vText == "sp") {
                 AsmOperandStack *op = new AsmOperandStack;

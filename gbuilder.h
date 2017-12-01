@@ -1,4 +1,5 @@
 #include <list>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -115,16 +116,22 @@ private:
 
 class GameData {
 public:
+    GameData()
+    : nextString(0) {
+    }
     ~GameData() {
         for (FunctionDef *f : functions) {
             delete f;
         }
     }
+    std::string addString(const std::string &text);
 
     std::list<FunctionDef*> functions;
     std::set<std::string> vocabRaw;
+    std::map<std::string, std::string> stringtable;
 
 private:
+    int nextString;
 };
 
 class Lexer {
