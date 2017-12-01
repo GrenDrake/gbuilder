@@ -7,6 +7,7 @@ class AsmOperandStack;
 class AsmStatement;
 class CodeBlock;
 class FunctionDef;
+class ReturnDef;
 
 class AstWalker {
 public:
@@ -16,6 +17,7 @@ public:
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(CodeBlock *stmt) = 0;
     virtual void visit(FunctionDef *stmt) = 0;
+    virtual void visit(ReturnDef *stmt) = 0;
 };
 
 class SymbolDef {
@@ -79,6 +81,16 @@ public:
     bool isRelative;
     std::vector<AsmOperand*> operands;
 };
+
+class ReturnDef : public StatementDef{
+public:
+    virtual ~ReturnDef() {
+    }
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
+};
+
 
 class SymbolTable {
 public:

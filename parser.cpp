@@ -52,10 +52,16 @@ FunctionDef* Parser::doFunction() {
         delete newfunc;
         return nullptr;
     }
+    newfunc->code->statements.push_back(new ReturnDef);
     newfunc->code->locals.parent = &newfunc->args;
     return newfunc;
 }
 
+ReturnDef* Parser::doReturn() {
+    if (!expect("return")) return nullptr;
+    if (!expectAdv(Semicolon)) return nullptr;
+    return new ReturnDef;
+}
 CodeBlock* Parser::doCodeBlock() {
     if (!expectAdv(OpenBrace)) return nullptr;
     
@@ -72,6 +78,8 @@ CodeBlock* Parser::doCodeBlock() {
             ((CodeBlock*)stmt)->locals.parent = &code->locals;
         } else if (matches("local")) {
             if (!doLocalsStmt(code)) return nullptr;
+        } else if (matches("return")) {
+            stmt = doReturn();
         } else if (matches("asm")) {
             stmt = doAsmBlock();
         } else {

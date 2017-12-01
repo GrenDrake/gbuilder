@@ -44,7 +44,11 @@ public:
             std::cout << "   (bad function body)\n";
         }
     }
-    
+    virtual void visit(ReturnDef *stmt) {
+        spaces();
+        std::cout << "RETURN 0\n";
+    }
+
 private:
     void printSymbols(SymbolTable &symbols) {
         std::cout << "(" << symbols.symbols.size() << ":";

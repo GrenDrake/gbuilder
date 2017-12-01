@@ -53,7 +53,8 @@ const char* tokenTypeName(TokenType type) {
 static const char *reservedWords[] = {
     "asm",
     "function",
-    "local"
+    "local",
+    "return"
 };
 static bool isReservedWord(const std::string &word) {
     for (const char *test : reservedWords) {

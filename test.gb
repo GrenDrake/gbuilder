@@ -31,7 +31,7 @@ function glk_setup() {
         glk 47 1 0;
     }
     
-//    return;
+    return;
 
 //    bad_start:
     asm quit;
