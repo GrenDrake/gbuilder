@@ -10,6 +10,19 @@
 void printAST(GameData &gd);
 void doFirstPass(GameData &gd);
 
+SymbolDef* SymbolTable::get(const std::string &name) {
+    for (SymbolDef &s : symbols) {
+        if (s.name == name) {
+            return &s;
+        }
+    }
+    if (parent) {
+        return parent->get(name);
+    } else {
+        return nullptr;
+    }
+}
+
 std::string GameData::addString(const std::string &text) {
     std::stringstream ss;
     ss << "__str_" << nextString;

@@ -114,6 +114,10 @@ CodeBlock* Parser::doCodeBlock() {
             stmt = doLabel();
         } else if (matches("asm")) {
             stmt = doAsmBlock();
+            CodeBlock *cb = dynamic_cast<CodeBlock*>(stmt);
+            if (cb) {
+                cb->locals.parent = &code->locals;
+            }
         } else {
             std::stringstream ss;
             ss << "unexpected token ";

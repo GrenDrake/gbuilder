@@ -9,7 +9,12 @@ public:
         std::cout << " i:" << stmt->value;
     }
     virtual void visit(AsmOperandIdentifier *stmt) {
-        std::cout << " s:" << stmt->value;
+        SymbolDef *symbol = curBlock->locals.get(stmt->value);
+        if (symbol) {
+            std::cout << ' ' << symbol->type << ':' << symbol->name << '(' << symbol->value << ')';
+        } else {
+            std::cout << " undef:" << stmt->value;
+        }
     }
     virtual void visit(AsmOperandStack *stmt) {
         std::cout << " SP";
@@ -28,6 +33,7 @@ public:
         printSymbols(stmt->locals);
         ++depth;
         for (StatementDef *s : stmt->statements) {
+            curBlock = stmt;
             s->accept(this);
         }
         --depth;
@@ -68,6 +74,7 @@ private:
         }
     }
     int depth;
+    CodeBlock *curBlock;
 };
 
 
