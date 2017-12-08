@@ -89,7 +89,7 @@ void printAST(GameData &gd) {
         }
     }
 
-    std::cout << "\n\nGLOBALS (" << gd.symbols.symbols.size() << "):\n";
+    std::cout << "\nGLOBALS (" << gd.symbols.symbols.size() << "):\n";
     for (SymbolDef &s : gd.symbols.symbols) {
         std::cout << "   ~" << s.name << "~ = " << s.value << '\n';
     }
