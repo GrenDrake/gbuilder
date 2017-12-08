@@ -25,7 +25,7 @@ public:
 class SymbolDef {
 public:
     SymbolDef(const std::string &name)
-    : name(name) {
+    : name(name), value(0) {
     }
     std::string name;
     int value;
@@ -103,7 +103,7 @@ public:
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
-    
+
     std::string name;
 };
 

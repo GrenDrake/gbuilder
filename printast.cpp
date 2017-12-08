@@ -36,7 +36,8 @@ public:
     }
     virtual void visit(FunctionDef *stmt) {
         depth = 0;
-        std::cout << "\nFUNCTION " << stmt->name << ' ';
+        std::cout << "\nFUNCTION " << stmt->name;
+        std::cout << " (locals: " << stmt->localCount << ") ";
         printSymbols(stmt->args);
         if (stmt->code) {
             stmt->code->accept(this);
@@ -57,7 +58,7 @@ private:
     void printSymbols(SymbolTable &symbols) {
         std::cout << "(" << symbols.symbols.size() << ":";
         for (SymbolDef &s : symbols.symbols) {
-            std::cout << " ~" << s.name << '~';
+            std::cout << "  (" << s.value << ") ~" << s.name << '~';
         }
         std::cout << " )\n";
     }
@@ -80,7 +81,7 @@ void printAST(GameData &gd) {
             std::cout << ' ' << s;
         }
     }
-    
+
     std::cout << "\n\nSTRINGS: " << gd.stringtable.size() << '\n';
     if (!gd.stringtable.empty()) {
         for (auto &s : gd.stringtable) {

@@ -8,6 +8,7 @@
 #include "gbuilder.h"
 
 void printAST(GameData &gd);
+void doFirstPass(GameData &gd);
 
 std::string GameData::addString(const std::string &text) {
     std::stringstream ss;
@@ -26,7 +27,7 @@ void showErrors(ErrorLogger &errors) {
 
 std::string readFile(const std::string &file) {
     std::ifstream inf(file);
-    std::string content( (std::istreambuf_iterator<char>(inf)), 
+    std::string content( (std::istreambuf_iterator<char>(inf)),
                          std::istreambuf_iterator<char>() );
     return content;
 }
@@ -39,12 +40,12 @@ int main() {
     ErrorLogger errors;
     Lexer lexer(errors, gamedata, filename, source);
     lexer.doLex();
-    
+
     if (!errors.empty()) {
         showErrors(errors);
         return 1;
     }
-    
+
     auto tokensList = lexer.getTokens();
     std::vector<Token> tokensVec(tokensList.begin(), tokensList.end());
     Parser parser(errors, gamedata, tokensVec);
@@ -54,6 +55,7 @@ int main() {
         return 1;
     }
 
+    doFirstPass(gamedata);
     printAST(gamedata);
 
     /*

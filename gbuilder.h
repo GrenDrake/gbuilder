@@ -51,10 +51,10 @@ const char* tokenTypeName(TokenType type);
 
 class Token {
 public:
-    Token() 
+    Token()
     : vInteger(0), vFloat(0.0) {
     }
-    Token(const std::string &file, int line, int column, TokenType type) 
+    Token(const std::string &file, int line, int column, TokenType type)
     : type(type), vInteger(0), vFloat(0.0), file(file), line(line), column(column) {
     }
 
@@ -62,7 +62,7 @@ public:
     std::string vText;
     int vInteger;
     double vFloat;
-    
+
     std::string file;
     int line, column;
 private:
@@ -73,7 +73,7 @@ public:
     enum Type {
         Error, Warning, Notice
     };
-    
+
     class Message {
     public:
         Message(Type type, const std::string &file, int line, int column, const std::string &message)
@@ -85,11 +85,11 @@ public:
         const int line, column;
         const std::string message;
     };
-    
+
     ErrorLogger()
     : theErrorCount(0), theWarningCount(0) {
     }
-    
+
     void add(Type type, const std::string &file, int line, int column, const std::string &message);
     std::list<Message>::iterator begin() {
         return errors.begin();
@@ -139,7 +139,7 @@ public:
     Lexer(ErrorLogger &errors, GameData &gamedata, const std::string &sourceFile, const std::string &source_text)
     : errors(errors), gamedata(gamedata), sourceFile(sourceFile), source(source_text) {
     }
-    
+
     void doLex();
     const std::list<Token>& getTokens() const {
         return tokens;
@@ -175,7 +175,7 @@ public:
     Parser(ErrorLogger &errors, GameData &gamedata, const std::vector<Token> &tokens)
     : current(0), errors(errors), gamedata(gamedata), tokens(tokens) {
     }
-    
+
     void doParse();
 private:
     FunctionDef* doFunction();
@@ -194,7 +194,7 @@ private:
     bool matches(const std::string &text);
     const Token* here();
     const Token* next();
-    
+
     void addError(ErrorLogger::Type type, const std::string &text);
 
     int current;
@@ -208,7 +208,7 @@ public:
     AsmCode(const char *name, int opcode, int operands, bool relative = false)
     : name(name), opcode(opcode), operands(operands), relative(relative) {
     }
-    
+
     const char *name;
     int opcode;
     int operands;
