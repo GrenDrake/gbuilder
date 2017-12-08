@@ -26,7 +26,6 @@ public:
                         delete *op;
                         op = stmt->operands.erase(op);
                         op = stmt->operands.insert(op, newInt);
-                        std::cout << ident->value << " = " << newInt->value << '\n';
                     }
                 }
             }

@@ -98,7 +98,6 @@ void printAST(GameData &gd) {
     std::cout << "\nFUNCTIONS: " << gd.functions.size() << '\n';
     for (FunctionDef *f : gd.functions) {
         f->accept(&aw);
-//        std::cout << f->name << '\n';
     }
 
 }
