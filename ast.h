@@ -110,6 +110,15 @@ public:
 
 class SymbolTable {
 public:
+    SymbolDef* get(const std::string &name) {
+        for (SymbolDef &s : symbols) {
+            if (s.name == name) {
+                return &s;
+            }
+        }
+        return nullptr;
+    }
+
     SymbolTable *parent;
     std::vector<SymbolDef> symbols;
 };

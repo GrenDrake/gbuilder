@@ -5,15 +5,30 @@
 
 class FirstPassWalker : public AstWalker {
 public:
-    virtual void visit(AsmOperandInteger *stmt) {
+    FirstPassWalker(GameData &gd)
+    : gamedata(gd) {
+
     }
-    virtual void visit(AsmOperandIdentifier *stmt) {
-    }
-    virtual void visit(AsmOperandStack *stmt) {
-    }
+
+    virtual void visit(AsmOperandInteger *stmt) {}
+    virtual void visit(AsmOperandIdentifier *stmt) {}
+    virtual void visit(AsmOperandStack *stmt) {}
     virtual void visit(AsmStatement *stmt) {
-        for (AsmOperand *op : stmt->operands) {
-            op->accept(this);
+        auto op = stmt->operands.begin();
+        while (op != stmt->operands.end()) {
+            AsmOperandIdentifier *ident = dynamic_cast<AsmOperandIdentifier*>(*op);
+            if (ident) {
+                SymbolDef *s = gamedata.symbols.get(ident->value);
+                if (s) {
+                    AsmOperandInteger *newInt = new AsmOperandInteger;
+                    newInt->value = s->value;
+                    delete *op;
+                    op = stmt->operands.erase(op);
+                    op = stmt->operands.insert(op, newInt);
+                    std::cout << ident->value << " = " << newInt->value << '\n';
+                }
+            }
+            op = ++op;
         }
     }
     virtual void visit(CodeBlock *stmt) {
@@ -57,6 +72,8 @@ private:
         }
         locals = cLocal;
     }
+
+    GameData &gamedata;
     int locals;
 };
 
@@ -65,7 +82,7 @@ private:
 
 void doFirstPass(GameData &gd) {
 
-    FirstPassWalker fpw;
+    FirstPassWalker fpw(gd);
     for (FunctionDef *f : gd.functions) {
         f->accept(&fpw);
     }
