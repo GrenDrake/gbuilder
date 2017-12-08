@@ -75,6 +75,7 @@ FunctionDef* Parser::doFunction() {
     }
     newfunc->code->statements.push_back(new ReturnDef);
     newfunc->code->locals.parent = &newfunc->args;
+    newfunc->args.parent = &gamedata.symbols;
     return newfunc;
 }
 
