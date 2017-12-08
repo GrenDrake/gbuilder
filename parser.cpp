@@ -38,7 +38,7 @@ void Parser::doConstant() {
     if (!expectAdv(OpAssign)) return;
 
     if (!expect(Integer)) return;
-    SymbolDef symbol(name);
+    SymbolDef symbol(name, SymbolDef::Constant);
     symbol.value = here()->vInteger;
     gamedata.symbols.symbols.push_back(std::move(symbol));
     next();
@@ -57,7 +57,7 @@ FunctionDef* Parser::doFunction() {
     if (matches(Identifier)) {
         while (true) {
             expect(Identifier);
-            SymbolDef sym(here()->vText);
+            SymbolDef sym(here()->vText, SymbolDef::Local);
             newfunc->args.symbols.push_back(sym);
             next();
             if (matches(Comma)) {
@@ -134,7 +134,7 @@ bool Parser::doLocalsStmt(CodeBlock *code) {
 
     while (true) {
         expect(Identifier);
-        SymbolDef sym(here()->vText);
+        SymbolDef sym(here()->vText, SymbolDef::Local);
         code->locals.symbols.push_back(sym);
         next();
         if (matches(Comma)) {

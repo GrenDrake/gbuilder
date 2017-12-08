@@ -24,10 +24,15 @@ public:
 
 class SymbolDef {
 public:
-    SymbolDef(const std::string &name)
-    : name(name), value(0) {
+    enum Type {
+        Constant, Local, RAM
+    };
+
+    SymbolDef(const std::string &name, Type type)
+    : name(name), type(type), value(0) {
     }
     std::string name;
+    Type type;
     int value;
 };
 

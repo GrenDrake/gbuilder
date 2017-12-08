@@ -91,7 +91,7 @@ void printAST(GameData &gd) {
 
     std::cout << "\nGLOBALS (" << gd.symbols.symbols.size() << "):\n";
     for (SymbolDef &s : gd.symbols.symbols) {
-        std::cout << "   ~" << s.name << "~ = " << s.value << '\n';
+        std::cout << "   " << s.name << " (" << s.type << ") = " << s.value << '\n';
     }
 
     PrintAstWalker aw;

@@ -20,12 +20,14 @@ public:
             if (ident) {
                 SymbolDef *s = gamedata.symbols.get(ident->value);
                 if (s) {
-                    AsmOperandInteger *newInt = new AsmOperandInteger;
-                    newInt->value = s->value;
-                    delete *op;
-                    op = stmt->operands.erase(op);
-                    op = stmt->operands.insert(op, newInt);
-                    std::cout << ident->value << " = " << newInt->value << '\n';
+                    if (s->type == SymbolDef::Constant) {
+                        AsmOperandInteger *newInt = new AsmOperandInteger;
+                        newInt->value = s->value;
+                        delete *op;
+                        op = stmt->operands.erase(op);
+                        op = stmt->operands.insert(op, newInt);
+                        std::cout << ident->value << " = " << newInt->value << '\n';
+                    }
                 }
             }
             op = ++op;
