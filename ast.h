@@ -89,16 +89,7 @@ public:
     std::vector<AsmOperand*> operands;
 };
 
-class ReturnDef : public StatementDef{
-public:
-    virtual ~ReturnDef() {
-    }
-    virtual void accept(AstWalker *walker) {
-        walker->visit(this);
-    }
-};
-
-class LabelStmt : public StatementDef{
+class LabelStmt : public AsmStatement{
 public:
     LabelStmt(const std::string &name)
     : name(name) {
@@ -112,6 +103,15 @@ public:
     std::string name;
 };
 
+
+class ReturnDef : public StatementDef{
+public:
+    virtual ~ReturnDef() {
+    }
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
+};
 
 class SymbolTable {
 public:
