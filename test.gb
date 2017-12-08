@@ -1,5 +1,9 @@
+constant glk_window_open    = 34;
+constant glk_set_window     = 47;
 
-function main() {
+constant wintype_TextBuffer = 3;
+
+function main(arg1, arg2) {
     local res, mainWindow;
 
     asm {
@@ -10,23 +14,21 @@ function main() {
 
         // glk_window_open
         copy sp 0; // rock
-        copy sp 3; // wintype_TextBuffer
+        copy sp wintype_TextBuffer;
         copy sp 0;
         copy sp 0;
         copy sp 0;
-        glk 34 5 mainWindow;
+        glk glk_window_open 5 mainWindow;
         jz mainWindow bad_start;
         label testme;
-        
+
         // glk_set_window
         copy sp mainWindow;
-        glk 47 1 0;
+        glk glk_set_window 1 0;
     }
 
-    asm {
-        streamstr "Hello World!";
-        streamchar '\n';
-    }
+    asm streamstr "Hello World!";
+    asm streamchar '\n';
 
     return;
 

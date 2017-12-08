@@ -129,6 +129,7 @@ public:
     std::list<FunctionDef*> functions;
     std::set<std::string> vocabRaw;
     std::map<std::string, std::string> stringtable;
+    SymbolTable symbols;
 
 private:
     int nextString;
@@ -178,6 +179,7 @@ public:
 
     void doParse();
 private:
+    void doConstant();
     FunctionDef* doFunction();
     CodeBlock* doCodeBlock();
     LabelStmt* doLabel();

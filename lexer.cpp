@@ -11,8 +11,8 @@ const char* tokenTypeName(TokenType type) {
         case Float:                 return "Float";
         case Vocab:                 return "Vocab";
         case ReservedWord:          return "ReservedWord";
-        
-        case OpPlus:                return "OpPlus";           
+
+        case OpPlus:                return "OpPlus";
         case OpMinus:               return "OpMinus";
         case OpDivide:              return "OpDivide";
         case OpMultiply:            return "OpMultiply";
@@ -21,7 +21,7 @@ const char* tokenTypeName(TokenType type) {
         case OpModulus:             return "OpModulus";
         case OpAssign:              return "OpAssign";
         case OpProperty:            return "OpProperty";
-        case OpPlusEquals:          return "OpPlusEquals";           
+        case OpPlusEquals:          return "OpPlusEquals";
         case OpMinusEquals:         return "OpMinusEquals";
         case OpDivideEquals:        return "OpDivideEquals";
         case OpMultiplyEquals:      return "OpMultiplyEquals";
@@ -34,7 +34,7 @@ const char* tokenTypeName(TokenType type) {
         case GreaterThanOrEquals:   return "GreaterThanOrEquals";
         case NotEquals:             return "NotEquals";
         case Equals:                return "Equals";
-    
+
         case OpenBrace:             return "OpenBrace";
         case CloseBrace:            return "CloseBrace";
         case OpenParan:             return "OpenParan";
@@ -42,16 +42,17 @@ const char* tokenTypeName(TokenType type) {
         case Semicolon:             return "Semicolon";
         case Comma:                 return "Comma";
         case Question:              return "Question";
-        
+
         case LogicalAnd:            return "LogicalAnd";
         case LogicalOr:             return "LogicalOr";
-        
+
         default:                    return "unnamed token";
     }
 }
 
 static const char *reservedWords[] = {
     "asm",
+    "constant",
     "function",
     "label",
     "local",
@@ -68,10 +69,10 @@ static bool isReservedWord(const std::string &word) {
 
 void Lexer::doLex() {
     Token t;
-    
+
     cLine = cColumn = 1;
     current = 0;
-    
+
     while (here()) {
         if (isspace(here())) {
             next();
@@ -146,7 +147,7 @@ void Lexer::doLex() {
             doSimpleToken(OpPower);
         } else if (here() == '.') {
             doSimpleToken(OpProperty);
-            
+
         } else if (here() == '<') {
             if (peek() == '=') {
                 doSimpleToken2(LessThanOrEquals);
@@ -204,7 +205,7 @@ void Lexer::doNumber() {
             next();
         }
     }
-    
+
     const std::string &text = source.substr(start, current-start);
     if (isFloat) {
         t.type = Float;
@@ -222,7 +223,7 @@ void Lexer::doIdentifier() {
     while (isIdentifier(here())) {
         next();
     }
-    
+
     t.vText = source.substr(start, current-start);
     if (isReservedWord(t.vText)) {
         t.type = ReservedWord;
@@ -252,7 +253,7 @@ void Lexer::doCharLiteral() {
             errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated character literal");
         }
     }
-    
+
     std::string rawText = source.substr(start, current-start);
     unescape(t.line, t.column, rawText);
     if (rawText.size() == 0) {
@@ -278,7 +279,7 @@ void Lexer::doString() {
             errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated string");
         }
     }
-    
+
     t.vText = source.substr(start, current-start);
     unescape(t.line, t.column, t.vText);
     tokens.push_back(std::move(t));
@@ -296,7 +297,7 @@ void Lexer::doVocab() {
             errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated vocab word");
         }
     }
-    
+
     t.vText = source.substr(start, current-start);
     gamedata.vocabRaw.insert(t.vText);
     tokens.push_back(std::move(t));
@@ -318,12 +319,12 @@ void Lexer::unescape(int line, int column, std::string &text) {
         if (text[i] != '\\') {
             continue;
         }
-        
+
         if (i + 1 >= text.size()) {
             errors.add(ErrorLogger::Error, sourceFile, line, column, "incomplete escape at end of string");
             continue;
         }
-        
+
         switch(text[i+1]) {
             case '\\':
             case '\'':

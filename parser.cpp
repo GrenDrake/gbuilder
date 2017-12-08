@@ -7,28 +7,49 @@
 void Parser::doParse() {
 
     while (here()) {
-        if (matches("function")) {
+        if (matches("constant")) {
+            doConstant();
+        } else if (matches("function")) {
             FunctionDef *newfunc = doFunction();
             if (newfunc) {
                 gamedata.functions.push_back(newfunc);
             }
         } else {
+            std::cout << "Unexpected token: ";
             std::cout << here()->file
-                      << ":" 
-                      << here()->line 
-                      << ":" 
-                      << here()->column 
-                      << ":  " 
+                      << ":"
+                      << here()->line
+                      << ":"
+                      << here()->column
+                      << ":  "
                       << tokenTypeName(here()->type) << '\n';
             next();
         }
     }
 }
 
+void Parser::doConstant() {
+    if (!expect("constant")) return;
+
+    if (!expect(Identifier)) return;
+    const std::string &name = here()->vText;
+    next();
+
+    if (!expectAdv(OpAssign)) return;
+
+    if (!expect(Integer)) return;
+    SymbolDef symbol(name);
+    symbol.value = here()->vInteger;
+    gamedata.symbols.symbols.push_back(std::move(symbol));
+    next();
+
+    if (!expectAdv(Semicolon)) return;
+}
+
 FunctionDef* Parser::doFunction() {
     if (!expect("function")) return nullptr;
     if (!expect(Identifier)) return nullptr;
-    
+
     FunctionDef *newfunc = new FunctionDef;
     newfunc->name = here()->vText;
     next();
@@ -72,14 +93,14 @@ LabelStmt* Parser::doLabel() {
 }
 CodeBlock* Parser::doCodeBlock() {
     if (!expectAdv(OpenBrace)) return nullptr;
-    
+
     CodeBlock *code = new CodeBlock;
     while (!matches(CloseBrace)) {
         if (here() == nullptr) {
             delete code;
             return nullptr;
         }
-        
+
         StatementDef *stmt = nullptr;
         if (here()->type == OpenBrace) {
             stmt = doCodeBlock();
@@ -128,7 +149,7 @@ bool Parser::doLocalsStmt(CodeBlock *code) {
 
 StatementDef* Parser::doAsmBlock() {
     if (!expect("asm")) return nullptr;
-    
+
     if (!matches(OpenBrace)) {
         StatementDef *stmt = doAsmStatement();
         return stmt;
@@ -136,14 +157,14 @@ StatementDef* Parser::doAsmBlock() {
 
     if (!expectAdv(OpenBrace)) return nullptr;
     CodeBlock *code = new CodeBlock;
-    
-    
+
+
     while (!matches(CloseBrace)) {
         if (here() == nullptr) {
             delete code;
             return nullptr;
         }
-        
+
         StatementDef *stmt = doAsmStatement();
         if (stmt) {
             code->statements.push_back(stmt);
@@ -160,7 +181,7 @@ StatementDef* Parser::doAsmStatement() {
     AsmStatement *stmt = new AsmStatement;
     stmt->opname = here()->vText;
     next();
-    
+
     const AsmCode &ac = opcodeByName(stmt->opname);
     if (ac.name == nullptr) {
         addError(ErrorLogger::Error, "unknown assembly mnemonic");
@@ -175,7 +196,7 @@ StatementDef* Parser::doAsmStatement() {
             stmt->operands.push_back(op);
         }
     }
-    
+
     if (ac.operands != stmt->operands.size()) {
         addError(ErrorLogger::Error, "bad operand count");
     }
@@ -279,7 +300,7 @@ bool Parser::matches(const std::string &text) {
     if (!here()) {
         return false;
     }
-    
+
     if (!here() || here()->type != ReservedWord || here()->vText != text) {
         return false;
     }
