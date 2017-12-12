@@ -52,12 +52,17 @@ public:
     virtual ~AsmLine() { };
     virtual void accept(AstWalker *walker) = 0;
     virtual void accept(AsmWalker *walker) = 0;
+
+    virtual int getSize() const = 0;
+    int pos;
 };
 class AsmOperand {
 public:
     enum Type {
         Constant, Local, Address, Stack, Identifier
     };
+
+    int getSize() const;
 
     Type type;
     int value;
@@ -87,6 +92,10 @@ public:
         data.push_back( (word      ) & 0xFF );
     }
 
+    virtual int getSize() const {
+        return data.size();
+    }
+
     std::vector<unsigned char> data;
 };
 
@@ -103,6 +112,9 @@ public:
     virtual void accept(AsmWalker *walker) {
         walker->visit(this);
     }
+
+    virtual int getSize() const;
+
     std::string opname;
     int opcode;
     bool isRelative;
@@ -121,6 +133,10 @@ public:
     }
     virtual void accept(AsmWalker *walker) {
         walker->visit(this);
+    }
+
+    virtual int getSize() const {
+        return 0;
     }
 
     std::string name;

@@ -13,6 +13,7 @@ void printAST(GameData &gd);
 void dump_asm(std::vector<AsmLine*> lines);
 void doFirstPass(GameData &gd);
 std::vector<AsmLine*> buildAsm(GameData &gd);
+void build_game(std::vector<AsmLine*> lines);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
     for (SymbolDef &s : symbols) {
@@ -35,6 +36,38 @@ std::string GameData::addString(const std::string &text) {
     return ss.str();
 }
 
+int AsmOperand::getSize() const {
+    ;
+    return 2;
+}
+
+int AsmStatement::getSize() const {
+    int size = 0;
+
+    // size of opcode
+    if (opcode > 0x3FFF) {
+        size += 4;
+    } else if (opcode > 0x7F) {
+        size += 2;
+    } else {
+        size += 1;
+    }
+
+    // size of addressing modes
+    size += operands.size() / 2;
+    if (operands.size() % 2) {
+        ++size;
+    }
+
+    // size of operands
+    for (AsmOperand *op : operands) {
+        size += op->getSize();
+    }
+
+    return size;
+}
+
+
 void showErrors(ErrorLogger &errors) {
     for (auto m : errors) {
         std::cerr << m.format() << "\n";
@@ -51,7 +84,7 @@ std::string readFile(const std::string &file) {
 
 int main() {
     std::array<const char *, 2> sourceFiles = { {
-        "test.gb",
+        "test.gc",
         "glk.gc"
     } };
     ErrorLogger errors;
@@ -80,11 +113,12 @@ int main() {
     }
 
     doFirstPass(gamedata);
-    printAST(gamedata);
+//    printAST(gamedata);
 
 
     auto asmlist = buildAsm(gamedata);
     dump_asm(asmlist);
+    build_game(asmlist);
 
     return 0;
 }
