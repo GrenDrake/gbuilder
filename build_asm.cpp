@@ -72,7 +72,6 @@ public:
                 std::string::const_iterator cur = strdef.second.cbegin();
                 while (cur != strdef.second.end()) {
                     int cp = utf8::next(cur, strdef.second.cend());
-                    std::cout << cp << "\n";
                     strData->pushWord(cp);
                 }
                 strData->pushWord(0);
