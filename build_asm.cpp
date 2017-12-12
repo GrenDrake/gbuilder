@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+#include <utf8.h>
+
 #include "gbuilder.h"
 
 
@@ -54,12 +56,34 @@ public:
             LabelStmt *strLabel = new LabelStmt(strdef.first);
             stmts.push_back(strLabel);
 
-            AsmData *strData = new AsmData;
-            strData->data.push_back(0xE0);
-            for (char c : strdef.second) {
-                strData->data.push_back(c);
+            bool isUnicode = false;
+            for (unsigned char c : strdef.second) {
+                if (c > 127) {
+                    isUnicode = true;
+                }
             }
-            strData->data.push_back(0);
+
+            AsmData *strData = new AsmData;
+            if (isUnicode) {
+                strData->data.push_back(0xE2);
+                strData->data.push_back(0);
+                strData->data.push_back(0);
+                strData->data.push_back(0);
+                std::string::const_iterator cur = strdef.second.cbegin();
+                while (cur != strdef.second.end()) {
+                    int cp = utf8::next(cur, strdef.second.cend());
+                    std::cout << cp << "\n";
+                    strData->pushWord(cp);
+                }
+                strData->pushWord(0);
+            } else {
+                strData->data.push_back(0xE0);
+                for (char c : strdef.second) {
+                    strData->data.push_back(c);
+                }
+                strData->data.push_back(0);
+            }
+
             stmts.push_back(strData);
         }
     }

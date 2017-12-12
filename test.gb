@@ -29,9 +29,15 @@ function main(arg1, arg2) {
 
     asm streamstr "Hello World!";
     asm streamchar '\n';
+    asm streamstr "test [原文]篭毛 test";
+    asm streamchar '\n';
 
     return;
 
     label bad_start;
     asm quit;
+}
+
+function setup_glk() {
+
 }

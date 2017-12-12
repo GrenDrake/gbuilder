@@ -72,6 +72,21 @@ public:
     virtual void accept(AsmWalker *walker) {
         walker->visit(this);
     }
+
+    void pushByte(unsigned word) {
+        data.push_back(word & 0xFF);
+    }
+    void pushShort(unsigned word) {
+        data.push_back( (word >>  8) & 0xFF );
+        data.push_back( (word      ) & 0xFF );
+    }
+    void pushWord(unsigned word) {
+        data.push_back( (word >> 24) & 0xFF );
+        data.push_back( (word >> 16) & 0xFF );
+        data.push_back( (word >>  8) & 0xFF );
+        data.push_back( (word      ) & 0xFF );
+    }
+
     std::vector<unsigned char> data;
 };
 
