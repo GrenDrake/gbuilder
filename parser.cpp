@@ -211,33 +211,35 @@ StatementDef* Parser::doAsmStatement() {
 }
 
 AsmOperand* Parser::doAsmOperand() {
+    AsmOperand *op = new AsmOperand;
     switch(here()->type) {
         case Integer: {
-            AsmOperandInteger *op = new AsmOperandInteger;
+            op->type = AsmOperand::Constant;
             op->value = here()->vInteger;
             next();
             return op;
         }
         case String: {
-            const std::string &s = gamedata.addString(here()->vText);
-            AsmOperandIdentifier *op = new AsmOperandIdentifier;
-            op->value = s;
+            op->type = AsmOperand::Identifier;
+//            const std::string &s = gamedata.addString(here()->vText);
+            op->text = gamedata.addString(here()->vText);
             next();
             return op;
         }
         case Identifier: {
             if (here()->vText == "sp") {
-                AsmOperandStack *op = new AsmOperandStack;
+                op->type = AsmOperand::Stack;
                 next();
                 return op;
             } else {
-                AsmOperandIdentifier *op = new AsmOperandIdentifier;
-                op->value = here()->vText;
+                op->type = AsmOperand::Identifier;
+                op->text = here()->vText;
                 next();
                 return op;
             }
         }
         default:
+            delete op;
             addError(ErrorLogger::Error, "bad operand type");
             next();
             return nullptr;

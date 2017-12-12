@@ -1,9 +1,7 @@
 #include <string>
 #include <vector>
 
-class AsmOperandInteger;
-class AsmOperandIdentifier;
-class AsmOperandStack;
+class AsmOperand;
 class AsmStatement;
 class CodeBlock;
 class FunctionDef;
@@ -12,9 +10,6 @@ class LabelStmt;
 
 class AstWalker {
 public:
-    virtual void visit(AsmOperandInteger *stmt) = 0;
-    virtual void visit(AsmOperandIdentifier *stmt) = 0;
-    virtual void visit(AsmOperandStack *stmt) = 0;
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(CodeBlock *stmt) = 0;
     virtual void visit(FunctionDef *stmt) = 0;
@@ -45,32 +40,13 @@ public:
 
 class AsmOperand {
 public:
-    virtual ~AsmOperand() {
-    }
-    virtual void accept(AstWalker *walker) = 0;
-};
+    enum Type {
+        Constant, Local, Address, Stack, Identifier
+    };
 
-class AsmOperandInteger : public AsmOperand {
-public:
-    virtual void accept(AstWalker *walker) {
-        walker->visit(this);
-    }
+    Type type;
     int value;
-};
-
-class AsmOperandIdentifier : public AsmOperand {
-public:
-    virtual void accept(AstWalker *walker) {
-        walker->visit(this);
-    }
-    std::string value;
-};
-
-class AsmOperandStack : public AsmOperand {
-public:
-    virtual void accept(AstWalker *walker) {
-        walker->visit(this);
-    }
+    std::string text;
 };
 
 class AsmStatement : public StatementDef {

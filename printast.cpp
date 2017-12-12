@@ -5,26 +5,35 @@
 
 class PrintAstWalker : public AstWalker {
 public:
-    virtual void visit(AsmOperandInteger *stmt) {
-        std::cout << " i:" << stmt->value;
-    }
-    virtual void visit(AsmOperandIdentifier *stmt) {
-        SymbolDef *symbol = curBlock->locals.get(stmt->value);
-        if (symbol) {
-            std::cout << ' ' << symbol->type << ':' << symbol->name << '(' << symbol->value << ')';
-        } else {
-            std::cout << " undef:" << stmt->value;
-        }
-    }
-    virtual void visit(AsmOperandStack *stmt) {
-        std::cout << " SP";
-    }
+    // virtual void visit(AsmOperandIdentifier *stmt) {
+    //     SymbolDef *symbol = curBlock->locals.get(stmt->value);
+    //     if (symbol) {
+    //         std::cout << ' ' << symbol->type << ':' << symbol->name << '(' << symbol->value << ')';
+    //     } else {
+    //         std::cout << " undef:" << stmt->value;
+    //     }
+    // }
+    // virtual void visit(AsmOperandStack *stmt) {
+    //     std::cout << " SP";
+    // }
     virtual void visit(AsmStatement *stmt) {
         spaces();
         std::cout << "ASM  " << stmt->opname << " (" << stmt->opcode << ')';
         for (AsmOperand *op : stmt->operands) {
-            op->accept(this);
-        }
+            switch(op->type) {
+                case AsmOperand::Constant:
+                    std::cout << " c:" << op->value;
+                    break;
+                case AsmOperand::Local:
+                    std::cout << " l:" << op->value;
+                    break;
+                case AsmOperand::Identifier:
+                    std::cout << " i:~" << op->text << '~';
+                    break;
+                default:
+                    break;
+            }
+            }
         std::cout << '\n';
     }
     virtual void visit(CodeBlock *stmt) {

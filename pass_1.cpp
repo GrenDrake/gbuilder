@@ -5,31 +5,21 @@
 
 class FirstPassWalker : public AstWalker {
 public:
-    FirstPassWalker(GameData &gd)
-    : gamedata(gd) {
 
-    }
-
-    virtual void visit(AsmOperandInteger *stmt) {}
-    virtual void visit(AsmOperandIdentifier *stmt) {}
-    virtual void visit(AsmOperandStack *stmt) {}
     virtual void visit(AsmStatement *stmt) {
-        auto op = stmt->operands.begin();
-        while (op != stmt->operands.end()) {
-            AsmOperandIdentifier *ident = dynamic_cast<AsmOperandIdentifier*>(*op);
-            if (ident) {
-                SymbolDef *s = gamedata.symbols.get(ident->value);
+        for (AsmOperand *op : stmt->operands) {
+            if (op->type == AsmOperand::Identifier) {
+                SymbolDef *s = codeBlock->locals.get(op->text);
                 if (s) {
                     if (s->type == SymbolDef::Constant) {
-                        AsmOperandInteger *newInt = new AsmOperandInteger;
-                        newInt->value = s->value;
-                        delete *op;
-                        op = stmt->operands.erase(op);
-                        op = stmt->operands.insert(op, newInt);
+                        op->value = s->value;
+                        op->type = AsmOperand::Constant;
+                    } else if (s->type == SymbolDef::Local) {
+                        op->value = s->value;
+                        op->type = AsmOperand::Local;
                     }
                 }
             }
-            op = ++op;
         }
     }
     virtual void visit(CodeBlock *stmt) {
@@ -38,6 +28,7 @@ public:
         int maxLocals = locals;
         for (StatementDef *s : stmt->statements) {
            locals = localCount;
+           codeBlock = stmt;
             s->accept(this);
             if (locals > maxLocals) {
                maxLocals = locals;
@@ -74,7 +65,7 @@ private:
         locals = cLocal;
     }
 
-    GameData &gamedata;
+    CodeBlock *codeBlock;
     int locals;
 };
 
@@ -83,7 +74,7 @@ private:
 
 void doFirstPass(GameData &gd) {
 
-    FirstPassWalker fpw(gd);
+    FirstPassWalker fpw;
     for (FunctionDef *f : gd.functions) {
         f->accept(&fpw);
     }
