@@ -1,2 +1,3 @@
 gbuilder
 *.o
+.DS_Store
