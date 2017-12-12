@@ -172,6 +172,8 @@ void Lexer::doLex() {
 
         } else if (isIdentifier(here(), true)) {
             doIdentifier();
+        } else if (here() == '0' && (peek() == 'x' || peek() == 'X')) {
+            doHexNumber();
         } else if (isdigit(here())) {
             doNumber();
         } else if (here() == '"') {
@@ -188,6 +190,20 @@ void Lexer::doLex() {
         }
     }
 
+}
+
+void Lexer::doHexNumber() {
+    Token t(sourceFile, cLine, cColumn, Integer);
+    int start = current;
+    next(); next();
+
+    while (isxdigit(here())) {
+        next();
+    }
+
+    const std::string &text = source.substr(start, current-start);
+    t.vInteger = std::stoi(text, nullptr, 16);
+    tokens.push_back(std::move(t));
 }
 
 void Lexer::doNumber() {
@@ -211,7 +227,7 @@ void Lexer::doNumber() {
         t.type = Float;
         t.vFloat = std::stod(text);
     } else {
-        t.vInteger = std::stoi(text);
+        t.vInteger = std::stoi(text, nullptr, 10);
     }
     tokens.push_back(std::move(t));
 }

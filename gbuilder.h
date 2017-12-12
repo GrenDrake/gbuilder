@@ -148,6 +148,7 @@ public:
 private:
     void doCharLiteral();
     void doIdentifier();
+    void doHexNumber();
     void doNumber();
     void doSimpleToken(TokenType type);
     void doSimpleToken2(TokenType type);
