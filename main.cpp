@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -8,7 +9,9 @@
 #include "gbuilder.h"
 
 void printAST(GameData &gd);
+void dump_asm(std::vector<AsmLine*> lines);
 void doFirstPass(GameData &gd);
+std::vector<AsmLine*> buildAsm(GameData &gd);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
     for (SymbolDef &s : symbols) {
@@ -71,25 +74,9 @@ int main() {
     doFirstPass(gamedata);
     printAST(gamedata);
 
-    /*
-    for (Token &t : tokens) {
-        std::cout << t.file << ":" << t.line << ":" << t.column << ":  " << tokenTypeName(t.type);
-        switch (t.type) {
-            case Identifier:
-            case String:
-            case Vocab:
-                std::cout << " ~" << t.vText << "~\n";
-                break;
-            case Integer:
-                std::cout << " ~" << t.vInteger << "~\n";
-                break;
-            case Float:
-                std::cout << " ~" << t.vFloat << "~\n";
-                break;
-            default:
-                std::cout << "\n";
-        }
-    }*/
+
+    auto asmlist = buildAsm(gamedata);
+    dump_asm(asmlist);
 
     return 0;
 }

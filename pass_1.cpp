@@ -22,6 +22,8 @@ public:
             }
         }
     }
+    virtual void visit(AsmData *stmt) {
+    }
     virtual void visit(CodeBlock *stmt) {
         numberLocals(stmt->locals);
         int localCount = locals;

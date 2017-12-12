@@ -3,6 +3,7 @@
 
 class AsmOperand;
 class AsmStatement;
+class AsmData;
 class CodeBlock;
 class FunctionDef;
 class ReturnDef;
@@ -11,9 +12,17 @@ class LabelStmt;
 class AstWalker {
 public:
     virtual void visit(AsmStatement *stmt) = 0;
+    virtual void visit(AsmData *stmt) = 0;
     virtual void visit(CodeBlock *stmt) = 0;
     virtual void visit(FunctionDef *stmt) = 0;
     virtual void visit(ReturnDef *stmt) = 0;
+    virtual void visit(LabelStmt *stmt) = 0;
+};
+
+class AsmWalker {
+public:
+    virtual void visit(AsmStatement *stmt) = 0;
+    virtual void visit(AsmData *stmt) = 0;
     virtual void visit(LabelStmt *stmt) = 0;
 };
 
@@ -38,6 +47,12 @@ public:
     virtual void accept(AstWalker *walker) = 0;
 };
 
+class AsmLine : public StatementDef {
+public:
+    virtual ~AsmLine() { };
+    virtual void accept(AstWalker *walker) = 0;
+    virtual void accept(AsmWalker *walker) = 0;
+};
 class AsmOperand {
 public:
     enum Type {
@@ -48,8 +63,19 @@ public:
     int value;
     std::string text;
 };
+class AsmData : public AsmLine {
+public:
+    virtual ~AsmData() { };
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
+    virtual void accept(AsmWalker *walker) {
+        walker->visit(this);
+    }
+    std::vector<unsigned char> data;
+};
 
-class AsmStatement : public StatementDef {
+class AsmStatement : public AsmLine {
 public:
     virtual ~AsmStatement() {
         for (AsmOperand *op : operands) {
@@ -59,13 +85,16 @@ public:
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
+    virtual void accept(AsmWalker *walker) {
+        walker->visit(this);
+    }
     std::string opname;
     int opcode;
     bool isRelative;
     std::vector<AsmOperand*> operands;
 };
 
-class LabelStmt : public AsmStatement{
+class LabelStmt : public AsmLine {
 public:
     LabelStmt(const std::string &name)
     : name(name) {
@@ -75,12 +104,15 @@ public:
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
+    virtual void accept(AsmWalker *walker) {
+        walker->visit(this);
+    }
 
     std::string name;
 };
 
 
-class ReturnDef : public StatementDef{
+class ReturnDef : public StatementDef {
 public:
     virtual ~ReturnDef() {
     }

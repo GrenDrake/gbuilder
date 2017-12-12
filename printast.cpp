@@ -33,8 +33,10 @@ public:
                 default:
                     break;
             }
-            }
+        }
         std::cout << '\n';
+    }
+    virtual void visit(AsmData *stmt) {
     }
     virtual void visit(CodeBlock *stmt) {
         spaces();
