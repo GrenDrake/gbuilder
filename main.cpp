@@ -1,3 +1,4 @@
+#include <array>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -49,22 +50,29 @@ std::string readFile(const std::string &file) {
 }
 
 int main() {
+    std::array<const char *, 2> sourceFiles = { {
+        "test.gb",
+        "glk.gc"
+    } };
+    ErrorLogger errors;
     GameData gamedata;
 
-    std::string filename = "test.gb";
-    std::string source = readFile(filename);
-    ErrorLogger errors;
-    Lexer lexer(errors, gamedata, filename, source);
-    lexer.doLex();
+    std::vector<Token> tokenList;
+    for (const char *filename : sourceFiles) {
+        std::string source = readFile(filename);
+        Lexer lexer(errors, gamedata, filename, source);
+        lexer.doLex();
 
-    if (!errors.empty()) {
-        showErrors(errors);
-        return 1;
+        if (!errors.empty()) {
+            showErrors(errors);
+            return 1;
+        }
+
+        auto& newTokens = lexer.getTokens();
+        tokenList.insert(tokenList.cend(), newTokens.begin(), newTokens.end());
     }
 
-    auto tokensList = lexer.getTokens();
-    std::vector<Token> tokensVec(tokensList.begin(), tokensList.end());
-    Parser parser(errors, gamedata, tokensVec);
+    Parser parser(errors, gamedata, tokenList);
     parser.doParse();
     if (!errors.empty()) {
         showErrors(errors);
