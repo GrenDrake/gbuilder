@@ -1,3 +1,5 @@
+constant f_10 = 10.0;
+constant f_2_5 = 2.5;
 
 function main() {
     local x;
@@ -8,6 +10,14 @@ function main() {
     asm callfi say "Hello World!\n" 0;
     asm copy "test [原文]篭毛 test\n" x;
     asm callfi say x 0;
+
+    asm {
+        streamstr "Float result: ";
+        fmul f_2_5 2.0 sp;
+        ftonumn sp sp;
+        streamnum sp;
+        streamchar '\n';
+    }
 
     return;
 
