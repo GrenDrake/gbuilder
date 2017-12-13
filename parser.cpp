@@ -182,7 +182,10 @@ StatementDef* Parser::doAsmBlock() {
 StatementDef* Parser::doAsmStatement() {
     if (matches("label")) return doLabel();
 
-    if (!expect(Identifier)) return nullptr;
+    if (!matches(Identifier) && !matches(ReservedWord)) {
+        expect(Identifier);
+        return nullptr;
+    }
     AsmStatement *stmt = new AsmStatement;
     stmt->opname = here()->vText;
     next();
