@@ -1,5 +1,7 @@
-CXXFLAGS=-Wall -g -pedantic -std=c++11 -Iutf8/source
-OBJS=main.o lexer.o errorlogger.o parser.o dump_ast.o asm.o pass_1.o build_asm.o dump_asm.o build_game.o project.o
+CXXFLAGS=-Wall -g -pedantic -std=c++11 -Isrc/utf8/source
+OBJS=src/main.o src/lexer.o src/errorlogger.o src/parser.o src/dump_ast.o \
+	 src/asm.o src/pass_1.o src/build_asm.o src/dump_asm.o src/build_game.o \
+	 src/project.o
 TARGET=~/gbuilder
 
 $(TARGET): $(OBJS)
