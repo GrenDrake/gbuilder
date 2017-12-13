@@ -175,8 +175,6 @@ void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFi
     }
 
     out.seekg(0);
-    std::cout << "X-" << std::hex << readWord(out) << "-\n";
-    out.seekg(0);
     unsigned checksum = 0, next = 0;
     do {
         checksum += next;
