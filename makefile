@@ -8,6 +8,6 @@ $(TARGET): $(OBJS)
 	g++ $(OBJS) -o $(TARGET)
 
 clean:
-	$(RM) *.o $(TARGET)
+	$(RM) $(OBJS) $(TARGET)
 
 .PHONY: clean
