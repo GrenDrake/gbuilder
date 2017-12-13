@@ -1,15 +1,30 @@
 
 function main() {
+    local x;
 
     asm callf setup_glk 0;
+    asm callf verify 0;
 
-    asm {
-        streamstr "Hello World!";
-        streamchar '\n';
-        streamstr "test [原文]篭毛 test";
-        streamchar '\n';
-    }
+    asm callfi say "Hello World!\n" 0;
+    asm copy "test [原文]篭毛 test\n" x;
+    asm callfi say x 0;
 
     return;
 
+}
+
+function verify() {
+    asm {
+        verify sp;
+        jz sp all_good;
+        streamstr "verify failed.\n";
+        jump all_end;
+        label all_good;
+        streamstr "successfully verified.\n";
+        label all_end;
+    }
+}
+
+function say( toSay ) {
+    asm streamstr toSay;
 }
