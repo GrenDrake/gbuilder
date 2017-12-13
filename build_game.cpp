@@ -127,8 +127,8 @@ static void writeHeader(GlulxGame &glulx, std::ostream &out) {
     }
 }
 
-void build_game(GameData &gamedata, std::vector<AsmLine*> lines) {
-    std::ofstream out("output.ulx");
+void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile) {
+    std::ofstream out(projectFile->outputFile);
     GlulxGame gameBuilder(out, lines);
     int lastpos = 256;
 

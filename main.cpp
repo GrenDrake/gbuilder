@@ -1,4 +1,4 @@
-#include <array>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -13,7 +13,7 @@ void printAST(GameData &gd);
 void dump_asm(std::vector<AsmLine*> lines);
 void doFirstPass(GameData &gd);
 std::vector<AsmLine*> buildAsm(GameData &gd);
-void build_game(GameData &gamedata, std::vector<AsmLine*> lines);
+void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
     for (SymbolDef &s : symbols) {
@@ -135,22 +135,25 @@ std::string readFile(const std::string &file) {
     return content;
 }
 
-int main() {
-    std::array<const char *, 2> sourceFiles = { {
-        "test.gc",
-        "glk.gc"
-    } };
+int main(int argc, char **argv) {
     ErrorLogger errors;
     GameData gamedata;
 
+    if (argc != 2) {
+        std::cerr << "USAGE: gbuilder <project-file>\n";
+        return 1;
+    }
+    ProjectFile *pf = load_project(argv[1]);
+
     std::vector<Token> tokenList;
-    for (const char *filename : sourceFiles) {
+    for (const std::string &filename : pf->sourceFiles) {
         std::string source = readFile(filename);
         Lexer lexer(errors, gamedata, filename, source);
         lexer.doLex();
 
         if (!errors.empty()) {
             showErrors(errors);
+            delete pf;
             return 1;
         }
 
@@ -162,6 +165,7 @@ int main() {
     parser.doParse();
     if (!errors.empty()) {
         showErrors(errors);
+        delete pf;
         return 1;
     }
 
@@ -170,8 +174,10 @@ int main() {
 
 
     auto asmlist = buildAsm(gamedata);
-    dump_asm(asmlist);
-    build_game(gamedata, asmlist);
+//    dump_asm(asmlist);
+    build_game(gamedata, asmlist, pf);
 
+    delete pf;
+    std::cout << "Success!\n";
     return 0;
 }
