@@ -13,7 +13,7 @@ void printAST(GameData &gd);
 void dump_asm(std::vector<AsmLine*> lines);
 void doFirstPass(GameData &gd);
 std::vector<AsmLine*> buildAsm(GameData &gd);
-void build_game(std::vector<AsmLine*> lines);
+void build_game(GameData &gamedata, std::vector<AsmLine*> lines);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
     for (SymbolDef &s : symbols) {
@@ -130,7 +130,7 @@ int main() {
 
     auto asmlist = buildAsm(gamedata);
     dump_asm(asmlist);
-    build_game(asmlist);
+    build_game(gamedata, asmlist);
 
     return 0;
 }
