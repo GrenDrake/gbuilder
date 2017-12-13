@@ -6,7 +6,7 @@
 class AsmPrinter : public AsmWalker {
 public:
     virtual void visit(AsmStatement *stmt) {
-        std::cout << "asm " << stmt->opname << " (" << stmt->opcode << ')';
+        std::cout << "asm " << stmt->opname << " (" << std::hex << stmt->opcode << std::dec << ')';
         for (AsmOperand *op : stmt->operands) {
             switch(op->type) {
                 case AsmOperand::Constant:

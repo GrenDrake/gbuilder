@@ -9,17 +9,17 @@ function main(arg1, arg2) {
         setiosys 2 0;
 
         // glk_window_open
-        copy sp 0; // rock
-        copy sp wintype_TextBuffer;
-        copy sp 0;
-        copy sp 0;
-        copy sp 0;
+        copy 0 sp; // rock
+        copy wintype_TextBuffer sp;
+        copy 0 sp;
+        copy 0 sp;
+        copy 0 sp;
         glk glk_window_open 5 mainWindow;
         jz mainWindow bad_start;
         label testme;
 
         // glk_set_window
-        copy sp mainWindow;
+        copy mainWindow sp;
         glk glk_set_window 1 0;
     }
 

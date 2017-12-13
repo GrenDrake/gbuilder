@@ -38,20 +38,61 @@ std::string GameData::addString(const std::string &text) {
 
 int AsmOperand::getSize() {
     if (mySize >= 0) return mySize;
-    
+
     switch (type) {
         case AsmOperand::Stack:
             mySize = 0;
             break;
         case AsmOperand::Constant:
+            if (value == 0) {
+                mySize = 0;
+                break;
+            }
+            if (value >= -128 && value <= 127) {
+                mySize = 1;
+            } else if (value >= -32768 && value <= 32767) {
+                mySize = 2;
+            } else {
+                mySize = 4;
+            }
+            break;
         case AsmOperand::Address:
         case AsmOperand::Local:
+            if (value <= 0xFF) {
+                mySize = 1;
+            } else if (value <= 0xFFFF) {
+                mySize = 2;
+            } else {
+                mySize = 4;
+            }
+            break;
         case AsmOperand::Identifier:
             mySize = 4;
             break;
     }
     return mySize;
 }
+
+int AsmOperand::getMode() {
+    int sizeMode = 0;
+    switch(getSize()) {
+        case 0: sizeMode = 0;   break;
+        case 1: sizeMode = 1;   break;
+        case 2: sizeMode = 2;   break;
+        case 4: sizeMode = 3;   break;
+    }
+
+    switch(type) {
+        case AsmOperand::Stack:         return 8;
+        case AsmOperand::Identifier:
+        case AsmOperand::Constant:      return sizeMode;
+        case AsmOperand::Address:       return 4 + sizeMode;
+        case AsmOperand::Local:         return 8 + sizeMode;
+    }
+
+    return 0;
+}
+
 
 int AsmStatement::getSize() const {
     int size = 0;

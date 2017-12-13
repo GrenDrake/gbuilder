@@ -1,4 +1,4 @@
-constant glk_window_open    = 34;
+constant glk_window_open    = 35;
 constant glk_set_window     = 47;
 
 constant wintype_TextBuffer = 3;

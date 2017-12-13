@@ -62,11 +62,12 @@ public:
         Constant, Local, Address, Stack, Identifier
     };
 
-    AsmOperand() 
+    AsmOperand()
     : type(Constant), value(0), mySize(-1)
     { }
 
     int getSize();
+    int getMode();
 
     Type type;
     int value;
