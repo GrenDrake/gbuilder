@@ -137,12 +137,12 @@ private:
 
 class Lexer {
 public:
-    Lexer(ErrorLogger &errors, GameData &gamedata, const std::string &sourceFile, const std::string &source_text)
-    : errors(errors), gamedata(gamedata), sourceFile(sourceFile), source(source_text) {
+    Lexer(ErrorLogger &errors)
+    : errors(errors) {
     }
 
-    void doLex();
-    const std::list<Token>& getTokens() const {
+    void doLex(const std::string &sourceFile, const std::string &source_text);
+    const std::vector<Token>& getTokens() const {
         return tokens;
     }
 private:
@@ -164,10 +164,10 @@ private:
     int prev() const;
 
     ErrorLogger &errors;
-    GameData &gamedata;
-    const std::string &sourceFile;
-    const std::string &source;
-    std::list<Token> tokens;
+    std::set<std::string> vocab;
+    std::string sourceFile;
+    std::string source;
+    std::vector<Token> tokens;
     int current;
     int cLine, cColumn;
 };

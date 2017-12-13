@@ -67,7 +67,9 @@ static bool isReservedWord(const std::string &word) {
     return false;
 }
 
-void Lexer::doLex() {
+void Lexer::doLex(const std::string &sourceFile, const std::string &source_text) {
+    this->sourceFile = sourceFile;
+    source = source_text;
     Token t;
 
     cLine = cColumn = 1;
@@ -315,7 +317,7 @@ void Lexer::doVocab() {
     }
 
     t.vText = source.substr(start, current-start);
-    gamedata.vocabRaw.insert(t.vText);
+    vocab.insert(t.vText);
     tokens.push_back(std::move(t));
     next();
 }

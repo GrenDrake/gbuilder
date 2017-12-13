@@ -145,23 +145,19 @@ int main(int argc, char **argv) {
     }
     ProjectFile *pf = load_project(argv[1]);
 
-    std::vector<Token> tokenList;
+    Lexer lexer(errors);
     for (const std::string &filename : pf->sourceFiles) {
         std::string source = readFile(filename);
-        Lexer lexer(errors, gamedata, filename, source);
-        lexer.doLex();
+        lexer.doLex(filename, source);
 
         if (!errors.empty()) {
             showErrors(errors);
             delete pf;
             return 1;
         }
-
-        auto& newTokens = lexer.getTokens();
-        tokenList.insert(tokenList.cend(), newTokens.begin(), newTokens.end());
     }
 
-    Parser parser(errors, gamedata, tokenList);
+    Parser parser(errors, gamedata, lexer.getTokens());
     parser.doParse();
     if (!errors.empty()) {
         showErrors(errors);
