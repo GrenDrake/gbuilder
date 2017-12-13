@@ -21,6 +21,15 @@ static void writeWord(std::ostream &out, int word) {
     out.put((word      ) & 0xFF);
 }
 
+static int readWord(std::istream &in) {
+    int result = 0;
+    result |= in.get() << 24;
+    result |= in.get() << 16;
+    result |= in.get() << 8;
+    result |= in.get();
+    return result;
+}
+
 class GlulxGame : public AsmWalker {
 public:
     virtual void visit(AsmStatement *stmt) {
@@ -128,7 +137,7 @@ static void writeHeader(GlulxGame &glulx, std::ostream &out) {
 }
 
 void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile) {
-    std::ofstream out(projectFile->outputFile);
+    std::fstream out(projectFile->outputFile, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     GlulxGame gameBuilder(out, lines);
     int lastpos = 256;
 
@@ -164,4 +173,17 @@ void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFi
     for (int i = out.tellp(); i < gameBuilder.endOfRam; ++i) {
         out.put(0);
     }
+
+    out.seekg(0);
+    std::cout << "X-" << std::hex << readWord(out) << "-\n";
+    out.seekg(0);
+    unsigned checksum = 0, next = 0;
+    do {
+        checksum += next;
+        next = readWord(out);
+    } while (out.good());
+    out.clear();
+    out.seekp(32);
+    writeWord(out, checksum);
+    std::cout << (unsigned)checksum << "\n";
 }
