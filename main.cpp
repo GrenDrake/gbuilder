@@ -36,9 +36,21 @@ std::string GameData::addString(const std::string &text) {
     return ss.str();
 }
 
-int AsmOperand::getSize() const {
-    ;
-    return 2;
+int AsmOperand::getSize() {
+    if (mySize >= 0) return mySize;
+    
+    switch (type) {
+        case AsmOperand::Stack:
+            mySize = 0;
+            break;
+        case AsmOperand::Constant:
+        case AsmOperand::Address:
+        case AsmOperand::Local:
+        case AsmOperand::Identifier:
+            mySize = 4;
+            break;
+    }
+    return mySize;
 }
 
 int AsmStatement::getSize() const {

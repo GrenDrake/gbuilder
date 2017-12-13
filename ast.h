@@ -62,11 +62,16 @@ public:
         Constant, Local, Address, Stack, Identifier
     };
 
-    int getSize() const;
+    AsmOperand() 
+    : type(Constant), value(0), mySize(-1)
+    { }
+
+    int getSize();
 
     Type type;
     int value;
     std::string text;
+    int mySize;
 };
 class AsmData : public AsmLine {
 public:
