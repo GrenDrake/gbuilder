@@ -6,9 +6,6 @@
 #include "project.h"
 
 
-
-std::string readFile(const std::string &file); // defined in main.cpp
-
 ProjectFile* load_project(const char *project_file) {
     std::ifstream inf(project_file);
     if (!inf) {
