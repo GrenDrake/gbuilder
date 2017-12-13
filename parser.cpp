@@ -4,6 +4,15 @@
 
 #include "gbuilder.h"
 
+static int floatAsInt(float initial) {
+    union {
+        int a;
+        float b;
+    } typepun;
+    typepun.b = initial;
+    return typepun.a;
+}
+
 void Parser::doParse() {
 
     while (here()) {
@@ -37,11 +46,20 @@ void Parser::doConstant() {
 
     if (!expectAdv(OpAssign)) return;
 
-    if (!expect(Integer)) return;
-    SymbolDef symbol(name, SymbolDef::Constant);
-    symbol.value = here()->vInteger;
-    gamedata.symbols.symbols.push_back(std::move(symbol));
-    next();
+    if (matches(Integer)) {
+        SymbolDef symbol(name, SymbolDef::Constant);
+        symbol.value = here()->vInteger;
+        gamedata.symbols.symbols.push_back(std::move(symbol));
+        next();
+    } else if (matches(Float)) {
+        SymbolDef symbol(name, SymbolDef::Constant);
+        symbol.value = floatAsInt(here()->vFloat);
+        gamedata.symbols.symbols.push_back(std::move(symbol));
+        next();
+    } else {
+        expect(Integer);
+        return;
+    }
 
     if (!expectAdv(Semicolon)) return;
 }
@@ -219,6 +237,12 @@ AsmOperand* Parser::doAsmOperand() {
         case Integer: {
             op->type = AsmOperand::Constant;
             op->value = here()->vInteger;
+            next();
+            return op;
+        }
+        case Float: {
+            op->type = AsmOperand::Constant;
+            op->value = floatAsInt(here()->vFloat);
             next();
             return op;
         }
