@@ -1,35 +1,15 @@
 
-function main(arg1, arg2) {
-    local res, mainWindow;
+function main() {
+
+    asm callf setup_glk 0;
 
     asm {
-        gestalt 4 2 res;
-        jz res bad_start;
-
-        setiosys 2 0;
-
-        // glk_window_open
-        copy 0 sp; // rock
-        copy wintype_TextBuffer sp;
-        copy 0 sp;
-        copy 0 sp;
-        copy 0 sp;
-        glk glk_window_open 5 mainWindow;
-        jz mainWindow bad_start;
-        label testme;
-
-        // glk_set_window
-        copy mainWindow sp;
-        glk glk_set_window 1 0;
+        streamstr "Hello World!";
+        streamchar '\n';
+        streamstr "test [原文]篭毛 test";
+        streamchar '\n';
     }
-
-    asm streamstr "Hello World!";
-    asm streamchar '\n';
-    asm streamstr "test [原文]篭毛 test";
-    asm streamchar '\n';
 
     return;
 
-    label bad_start;
-    asm quit;
 }
