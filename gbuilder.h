@@ -220,14 +220,4 @@ public:
 
 const AsmCode& opcodeByName(const std::string &name);
 
-#include <string>
-#include <vector>
-class ProjectFile {
-public:
-
-    int stackSize;
-    int extraMemory;
-    std::vector<std::string> sourceFiles;
-    std::string outputFile;
-};
-ProjectFile* load_project(const char *project_file);
+#include "project.h"
