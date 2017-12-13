@@ -29,6 +29,17 @@ public:
         stmts.push_back(funcLabel);
         AsmData *funcHeader = new AsmData();
         funcHeader->data.push_back(0xC1);
+        int locals = stmt->localCount;
+        while (locals >= 255) {
+            funcHeader->data.push_back(4);
+            funcHeader->data.push_back(256);
+            locals -= 255;
+        }
+        if (locals) {
+            funcHeader->data.push_back(4);
+            funcHeader->data.push_back(locals);
+        }
+
         funcHeader->data.push_back(0);
         funcHeader->data.push_back(0);
         stmts.push_back(funcHeader);
