@@ -101,6 +101,7 @@ FunctionDef* Parser::doFunction() {
         delete newfunc;
         return nullptr;
     }
+    gamedata.symbols.add(new SymbolDef(newfunc->name, SymbolDef::Function));
     newfunc->code->statements.push_back(new ReturnDef);
     return newfunc;
 }
@@ -179,6 +180,9 @@ LabelStmt* Parser::doLabel() {
     const std::string &name = here()->vText;
     next();
     if (!expectAdv(Semicolon)) return nullptr;
+    symbolExists(*curTable, name);
+    SymbolDef *sym = new SymbolDef(name, SymbolDef::Label);
+    curTable->add(sym, true);
     return new LabelStmt(name);
 }
 

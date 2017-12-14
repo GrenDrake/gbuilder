@@ -1,10 +1,14 @@
 #include <iostream>
+#include <sstream>
 
 #include "gbuilder.h"
 
 
 class FirstPassWalker : public AstWalker {
 public:
+    FirstPassWalker(ErrorLogger &errors)
+    : errors(errors) {
+    }
 
     virtual void visit(AsmStatement *stmt) {
         for (AsmOperand *op : stmt->operands) {
@@ -17,7 +21,13 @@ public:
                     } else if (s->type == SymbolDef::Local) {
                         op->value = s->value;
                         op->type = AsmOperand::Local;
+                    } else if (s->type == SymbolDef::Label) {
+                        op->text = "__" + function->name + "__" + s->name;
                     }
+                } else {
+                    std::stringstream ss;
+                    ss << "Undefined symbol " << op->text << ".";
+                    errors.add(ErrorLogger::Error, "(1st-pass)", 0, 0, ss.str());
                 }
             }
         }
@@ -43,6 +53,7 @@ public:
         numberLocals(stmt->args);
         int localCount = locals;
         int maxLocals = locals;
+        function = stmt;
         if (stmt->code) {
             locals = localCount;
             stmt->code->accept(this);
@@ -55,6 +66,7 @@ public:
     virtual void visit(ReturnDef *stmt) {
     }
     virtual void visit(LabelStmt *stmt) {
+        stmt->name = "__" + function->name + "__" + stmt->name;
     }
 
 private:
@@ -67,16 +79,18 @@ private:
         locals = cLocal;
     }
 
+    FunctionDef *function;
     CodeBlock *codeBlock;
     int locals;
+    ErrorLogger &errors;
 };
 
 
 
 
-void doFirstPass(GameData &gd) {
+void doFirstPass(GameData &gd, ErrorLogger &errors) {
 
-    FirstPassWalker fpw;
+    FirstPassWalker fpw(errors);
     for (FunctionDef *f : gd.functions) {
         f->accept(&fpw);
     }

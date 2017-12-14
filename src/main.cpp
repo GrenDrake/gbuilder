@@ -11,7 +11,7 @@
 
 void printAST(GameData &gd);
 void dump_asm(std::vector<AsmLine*> lines);
-void doFirstPass(GameData &gd);
+void doFirstPass(GameData &gd, ErrorLogger &errors);
 std::vector<AsmLine*> buildAsm(GameData &gd);
 void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile, bool dumpLabels);
 
@@ -43,7 +43,15 @@ void SymbolTable::add(SymbolDef *symbol, bool functionScope) {
         return;
     }
 
-    symbols.insert({symbol->name, symbol});
+    if (functionScope && parent) {
+        SymbolTable *cur = this;
+        while (cur->parent->parent != nullptr) {
+            cur = cur->parent;
+        }
+        cur->add(symbol, false);
+    } else {
+        symbols.insert({symbol->name, symbol});
+    }
 }
 
 std::string GameData::addString(const std::string &text) {
@@ -51,6 +59,7 @@ std::string GameData::addString(const std::string &text) {
     ss << "__str_" << nextString;
     ++nextString;
     stringtable[ss.str()] = text;
+    symbols.add(new SymbolDef(ss.str(), SymbolDef::String));
     return ss.str();
 }
 
@@ -199,8 +208,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    doFirstPass(gamedata);
+    doFirstPass(gamedata, errors);
     if (showAST) printAST(gamedata);
+    if (!errors.empty()) {
+        showErrors(errors);
+        delete pf;
+        return 1;
+    }
 
 
     auto asmlist = buildAsm(gamedata);

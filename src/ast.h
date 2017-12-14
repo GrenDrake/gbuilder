@@ -148,7 +148,7 @@ public:
 class SymbolDef {
 public:
     enum Type {
-        Constant, Local, RAM, Label
+        Constant, Local, RAM, Label, Function, String
     };
 
     SymbolDef(const std::string &name, Type type)
