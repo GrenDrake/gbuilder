@@ -182,10 +182,13 @@ public:
 private:
     void doConstant();
     FunctionDef* doFunction();
+
+    StatementDef* doStatement();
     CodeBlock* doCodeBlock();
+    bool doLocalsStmt();
     LabelStmt* doLabel();
     ReturnDef* doReturn();
-    bool doLocalsStmt();
+
     StatementDef* doAsmBlock();
     StatementDef* doAsmStatement();
     AsmOperand* doAsmOperand();

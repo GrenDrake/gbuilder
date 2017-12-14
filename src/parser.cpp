@@ -14,7 +14,6 @@ static int floatAsInt(float initial) {
 }
 
 void Parser::doParse() {
-
     while (here()) {
         if (matches("constant")) {
             doConstant();
@@ -24,14 +23,11 @@ void Parser::doParse() {
                 gamedata.functions.push_back(newfunc);
             }
         } else {
-            std::cout << "Unexpected token: ";
-            std::cout << here()->file
-                      << ":"
-                      << here()->line
-                      << ":"
-                      << here()->column
-                      << ":  "
-                      << tokenTypeName(here()->type) << '\n';
+            std::stringstream ss;
+            ss << "unexpected token ";
+            ss << tokenTypeName(here()->type);
+            ss << ".";
+            addError(ErrorLogger::Error, ss.str());
             next();
         }
 
@@ -40,6 +36,11 @@ void Parser::doParse() {
         }
     }
 }
+
+
+/* ************************************************************ *
+ * TOP LEVEL CONSTRUCTS                                         *
+ * ************************************************************ */
 
 void Parser::doConstant() {
     if (!expect("constant")) return;
@@ -104,19 +105,34 @@ FunctionDef* Parser::doFunction() {
     return newfunc;
 }
 
-ReturnDef* Parser::doReturn() {
-    if (!expect("return")) return nullptr;
-    if (!expectAdv(Semicolon)) return nullptr;
-    return new ReturnDef;
+
+/* ************************************************************ *
+ * STATEMENT PARSING                                            *
+ * ************************************************************ */
+
+StatementDef* Parser::doStatement() {
+    StatementDef *stmt = nullptr;
+    if (here()->type == OpenBrace) {
+        stmt = doCodeBlock();
+    } else if (matches("local")) {
+        if (!doLocalsStmt()) return nullptr;
+    } else if (matches("return")) {
+        stmt = doReturn();
+    } else if (matches("label")) {
+        stmt = doLabel();
+    } else if (matches("asm")) {
+        stmt = doAsmBlock();
+    } else {
+        std::stringstream ss;
+        ss << "unexpected token ";
+        ss << tokenTypeName(here()->type);
+        ss << ".";
+        addError(ErrorLogger::Error, ss.str());
+        next();
+    }
+    return stmt;
 }
-LabelStmt* Parser::doLabel() {
-    if (!expect("label")) return nullptr;
-    if (!expect(Identifier)) return nullptr;
-    const std::string &name = here()->vText;
-    next();
-    if (!expectAdv(Semicolon)) return nullptr;
-    return new LabelStmt(name);
-}
+
 CodeBlock* Parser::doCodeBlock() {
     if (!expectAdv(OpenBrace)) return nullptr;
 
@@ -129,25 +145,7 @@ CodeBlock* Parser::doCodeBlock() {
         }
 
         curTable = &code->locals;
-        StatementDef *stmt = nullptr;
-        if (here()->type == OpenBrace) {
-            stmt = doCodeBlock();
-        } else if (matches("local")) {
-            if (!doLocalsStmt()) return nullptr;
-        } else if (matches("return")) {
-            stmt = doReturn();
-        } else if (matches("label")) {
-            stmt = doLabel();
-        } else if (matches("asm")) {
-            stmt = doAsmBlock();
-        } else {
-            std::stringstream ss;
-            ss << "unexpected token ";
-            ss << tokenTypeName(here()->type);
-            ss << ".";
-            addError(ErrorLogger::Error, ss.str());
-            next();
-        }
+        StatementDef *stmt = doStatement();
         if (stmt) {
             code->statements.push_back(stmt);
         }
@@ -174,6 +172,26 @@ bool Parser::doLocalsStmt() {
     if (!expectAdv(Semicolon)) return false;
     return true;
 }
+
+LabelStmt* Parser::doLabel() {
+    if (!expect("label")) return nullptr;
+    if (!expect(Identifier)) return nullptr;
+    const std::string &name = here()->vText;
+    next();
+    if (!expectAdv(Semicolon)) return nullptr;
+    return new LabelStmt(name);
+}
+
+ReturnDef* Parser::doReturn() {
+    if (!expect("return")) return nullptr;
+    if (!expectAdv(Semicolon)) return nullptr;
+    return new ReturnDef;
+}
+
+
+/* ************************************************************ *
+ * ASSEMBLY PARSING                                             *
+ * ************************************************************ */
 
 StatementDef* Parser::doAsmBlock() {
     if (!expect("asm")) return nullptr;
