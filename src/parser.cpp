@@ -133,7 +133,7 @@ CodeBlock* Parser::doCodeBlock() {
         if (here()->type == OpenBrace) {
             stmt = doCodeBlock();
         } else if (matches("local")) {
-            if (!doLocalsStmt(code)) return nullptr;
+            if (!doLocalsStmt()) return nullptr;
         } else if (matches("return")) {
             stmt = doReturn();
         } else if (matches("label")) {
@@ -156,14 +156,14 @@ CodeBlock* Parser::doCodeBlock() {
     return code;
 }
 
-bool Parser::doLocalsStmt(CodeBlock *code) {
+bool Parser::doLocalsStmt() {
     if (!expect("local")) return false;
 
     while (true) {
         if (!expect(Identifier)) return false;
-        symbolExists(code->locals, here()->vText);
+        symbolExists(*curTable, here()->vText);
         SymbolDef *sym = new SymbolDef(here()->vText, SymbolDef::Local);
-        code->locals.add(sym);
+        curTable->add(sym);
         next();
         if (matches(Comma)) {
             next();

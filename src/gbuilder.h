@@ -185,7 +185,7 @@ private:
     CodeBlock* doCodeBlock();
     LabelStmt* doLabel();
     ReturnDef* doReturn();
-    bool doLocalsStmt(CodeBlock *code);
+    bool doLocalsStmt();
     StatementDef* doAsmBlock();
     StatementDef* doAsmStatement();
     AsmOperand* doAsmOperand();
