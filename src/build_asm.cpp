@@ -32,7 +32,7 @@ public:
         int locals = stmt->localCount;
         while (locals >= 255) {
             funcHeader->data.push_back(4);
-            funcHeader->data.push_back(256);
+            funcHeader->data.push_back(255);
             locals -= 255;
         }
         if (locals) {
