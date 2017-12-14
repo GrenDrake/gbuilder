@@ -34,6 +34,10 @@ void Parser::doParse() {
                       << tokenTypeName(here()->type) << '\n';
             next();
         }
+
+        if (!errors.empty()) {
+            return;
+        }
     }
 }
 
@@ -44,17 +48,19 @@ void Parser::doConstant() {
     const std::string &name = here()->vText;
     next();
 
+    symbolExists(gamedata.symbols, name);
+
     if (!expectAdv(OpAssign)) return;
 
     if (matches(Integer)) {
-        SymbolDef symbol(name, SymbolDef::Constant);
-        symbol.value = here()->vInteger;
-        gamedata.symbols.symbols.push_back(std::move(symbol));
+        SymbolDef *symbol = new SymbolDef(name, SymbolDef::Constant);
+        symbol->value = here()->vInteger;
+        gamedata.symbols.add(symbol);
         next();
     } else if (matches(Float)) {
-        SymbolDef symbol(name, SymbolDef::Constant);
-        symbol.value = floatAsInt(here()->vFloat);
-        gamedata.symbols.symbols.push_back(std::move(symbol));
+        SymbolDef *symbol = new SymbolDef(name, SymbolDef::Constant);
+        symbol->value = floatAsInt(here()->vFloat);
+        gamedata.symbols.add(symbol);
         next();
     } else {
         expect(Integer);
@@ -70,13 +76,15 @@ FunctionDef* Parser::doFunction() {
 
     FunctionDef *newfunc = new FunctionDef;
     newfunc->name = here()->vText;
+    newfunc->args.parent = &gamedata.symbols;
     next();
     expectAdv(OpenParan);
     if (matches(Identifier)) {
         while (true) {
             expect(Identifier);
-            SymbolDef sym(here()->vText, SymbolDef::Local);
-            newfunc->args.symbols.push_back(sym);
+            symbolExists(newfunc->args, here()->vText);
+            SymbolDef *sym = new SymbolDef(here()->vText, SymbolDef::Local);
+            newfunc->args.add(sym);
             next();
             if (matches(Comma)) {
                 next();
@@ -86,14 +94,13 @@ FunctionDef* Parser::doFunction() {
         }
     }
     expectAdv(CloseParan);
+    curTable = &newfunc->args;
     newfunc->code = doCodeBlock();
     if (!newfunc->code) {
         delete newfunc;
         return nullptr;
     }
     newfunc->code->statements.push_back(new ReturnDef);
-    newfunc->code->locals.parent = &newfunc->args;
-    newfunc->args.parent = &gamedata.symbols;
     return newfunc;
 }
 
@@ -114,16 +121,17 @@ CodeBlock* Parser::doCodeBlock() {
     if (!expectAdv(OpenBrace)) return nullptr;
 
     CodeBlock *code = new CodeBlock;
+    code->locals.parent = curTable;
     while (!matches(CloseBrace)) {
         if (here() == nullptr) {
             delete code;
             return nullptr;
         }
 
+        curTable = &code->locals;
         StatementDef *stmt = nullptr;
         if (here()->type == OpenBrace) {
             stmt = doCodeBlock();
-            ((CodeBlock*)stmt)->locals.parent = &code->locals;
         } else if (matches("local")) {
             if (!doLocalsStmt(code)) return nullptr;
         } else if (matches("return")) {
@@ -132,10 +140,6 @@ CodeBlock* Parser::doCodeBlock() {
             stmt = doLabel();
         } else if (matches("asm")) {
             stmt = doAsmBlock();
-            CodeBlock *cb = dynamic_cast<CodeBlock*>(stmt);
-            if (cb) {
-                cb->locals.parent = &code->locals;
-            }
         } else {
             std::stringstream ss;
             ss << "unexpected token ";
@@ -156,9 +160,10 @@ bool Parser::doLocalsStmt(CodeBlock *code) {
     if (!expect("local")) return false;
 
     while (true) {
-        expect(Identifier);
-        SymbolDef sym(here()->vText, SymbolDef::Local);
-        code->locals.symbols.push_back(sym);
+        if (!expect(Identifier)) return false;
+        symbolExists(code->locals, here()->vText);
+        SymbolDef *sym = new SymbolDef(here()->vText, SymbolDef::Local);
+        code->locals.add(sym);
         next();
         if (matches(Comma)) {
             next();
@@ -180,6 +185,7 @@ StatementDef* Parser::doAsmBlock() {
 
     if (!expectAdv(OpenBrace)) return nullptr;
     CodeBlock *code = new CodeBlock;
+    code->locals.parent = curTable;
 
 
     while (!matches(CloseBrace)) {
@@ -339,6 +345,18 @@ bool Parser::matches(const std::string &text) {
         return false;
     }
     return true;
+}
+
+bool Parser::symbolExists(const SymbolTable &table, const std::string &name) {
+    if (table.exists(name)) {
+        std::stringstream ss;
+        ss << "symbol "
+           << name
+           << " already declared.";
+        addError(ErrorLogger::Error, ss.str());
+        return true;
+    }
+    return false;
 }
 
 const Token* Parser::here() {

@@ -16,16 +16,34 @@ std::vector<AsmLine*> buildAsm(GameData &gd);
 void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
-    for (SymbolDef &s : symbols) {
-        if (s.name == name) {
-            return &s;
+    if (symbols.count(name) > 0) {
+        return symbols.at(name);
         }
-    }
+
     if (parent) {
         return parent->get(name);
     } else {
         return nullptr;
     }
+}
+
+bool SymbolTable::exists(const std::string &name) const {
+    if (symbols.count(name) > 0) {
+        return true;
+    }
+    if (parent) {
+        return parent->exists(name);
+    } else {
+        return false;
+    }
+}
+
+void SymbolTable::add(SymbolDef *symbol, bool functionScope) {
+    if (exists(symbol->name)) {
+        return;
+    }
+
+    symbols.insert({symbol->name, symbol});
 }
 
 std::string GameData::addString(const std::string &text) {

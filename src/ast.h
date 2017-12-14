@@ -1,4 +1,5 @@
 #include <string>
+#include <map>
 #include <vector>
 
 class AsmOperand;
@@ -24,20 +25,6 @@ public:
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(AsmData *stmt) = 0;
     virtual void visit(LabelStmt *stmt) = 0;
-};
-
-class SymbolDef {
-public:
-    enum Type {
-        Constant, Local, RAM
-    };
-
-    SymbolDef(const std::string &name, Type type)
-    : name(name), type(type), value(0) {
-    }
-    std::string name;
-    Type type;
-    int value;
 };
 
 class StatementDef {
@@ -158,12 +145,37 @@ public:
     }
 };
 
+class SymbolDef {
+public:
+    enum Type {
+        Constant, Local, RAM, Label
+    };
+
+    SymbolDef(const std::string &name, Type type)
+    : name(name), type(type), value(0) {
+    }
+    std::string name;
+    Type type;
+    int value;
+};
+
 class SymbolTable {
 public:
+    SymbolTable()
+    : parent(nullptr) {
+    }
+    ~SymbolTable() {
+        for (auto i : symbols) {
+            delete i.second;
+        }
+    }
+
     SymbolDef* get(const std::string &name);
+    bool exists(const std::string &name) const;
+    void add(SymbolDef *name, bool functionScope = false);
 
     SymbolTable *parent;
-    std::vector<SymbolDef> symbols;
+    std::map<std::string, SymbolDef*> symbols;
 };
 
 class CodeBlock : public StatementDef {

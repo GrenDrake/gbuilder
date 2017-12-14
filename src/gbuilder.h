@@ -195,6 +195,7 @@ private:
     bool expect(const std::string &text);
     bool matches(TokenType type);
     bool matches(const std::string &text);
+    bool symbolExists(const SymbolTable &table, const std::string &name);
     const Token* here();
     const Token* next();
 
@@ -204,6 +205,7 @@ private:
     ErrorLogger &errors;
     GameData &gamedata;
     const std::vector<Token> &tokens;
+    SymbolTable *curTable;
 };
 
 class AsmCode {

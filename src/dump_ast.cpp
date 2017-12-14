@@ -74,8 +74,8 @@ public:
 private:
     void printSymbols(SymbolTable &symbols) {
         std::cout << "(" << symbols.symbols.size() << ":";
-        for (SymbolDef &s : symbols.symbols) {
-            std::cout << "  (" << s.value << ") ~" << s.name << '~';
+        for (auto &s : symbols.symbols) {
+            std::cout << "  (" << s.second->value << ") ~" << s.second->name << '~';
         }
         std::cout << " )\n";
     }
@@ -108,8 +108,8 @@ void printAST(GameData &gd) {
     }
 
     std::cout << "\nGLOBALS (" << gd.symbols.symbols.size() << "):\n";
-    for (SymbolDef &s : gd.symbols.symbols) {
-        std::cout << "   " << s.name << " (" << s.type << ") = " << s.value << '\n';
+    for (auto &s : gd.symbols.symbols) {
+        std::cout << "   " << s.second->name << " (" << s.second->type << ") = " << s.second->value << '\n';
     }
 
     PrintAstWalker aw;

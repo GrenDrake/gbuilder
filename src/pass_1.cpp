@@ -60,8 +60,8 @@ public:
 private:
     void numberLocals(SymbolTable &symbols) {
         int cLocal = locals;
-        for (SymbolDef &s : symbols.symbols) {
-            s.value = cLocal;
+        for (auto &s : symbols.symbols) {
+            s.second->value = cLocal;
             ++cLocal;
         }
         locals = cLocal;
