@@ -189,6 +189,8 @@ private:
     LabelStmt* doLabel();
     ReturnDef* doReturn();
 
+    Value* doValue();
+
     StatementDef* doAsmBlock();
     StatementDef* doAsmStatement();
     AsmOperand* doAsmOperand();

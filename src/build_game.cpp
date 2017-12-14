@@ -32,6 +32,8 @@ static int readWord(std::istream &in) {
 
 class GlulxGame : public AsmWalker {
 public:
+    virtual void visit(Value *stmt) {
+    }
     virtual void visit(AsmStatement *stmt) {
         if (stmt->opcode > 0x3FFF) {
             writeWord(out, stmt->opcode + 0xC0000000);
@@ -59,9 +61,10 @@ public:
 
         for (int i = 0; i < stmt->operands.size(); ++i) {
             AsmOperand *op = stmt->operands[i];
-            int value = op->value;
-            if (op->type == AsmOperand::Identifier) {
-                value = labels[op->text];
+            if (op->isStack) continue;
+            int value = op->value->value;
+            if (op->value->type == Value::Identifier) {
+                value = labels[op->value->text];
             }
             if (stmt->isRelative && i == stmt->operands.size() - 1) {
                 value = value - (stmt->pos + stmt->getSize()) + 2;

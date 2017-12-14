@@ -193,6 +193,42 @@ ReturnDef* Parser::doReturn() {
 }
 
 
+Value* Parser::doValue() {
+    Value *value = new Value;
+    switch(here()->type) {
+        case Integer: {
+            value->type = Value::Constant;
+            value->value = here()->vInteger;
+            next();
+            return value;
+        }
+        case Float: {
+            value->type = Value::Constant;
+            value->value = floatAsInt(here()->vFloat);
+            next();
+            return value;
+        }
+        case String: {
+            value->type = Value::Identifier;
+            value->text = gamedata.addString(here()->vText);
+            next();
+            return value;
+        }
+        case Identifier: {
+            value->type = Value::Identifier;
+            value->text = here()->vText;
+            next();
+            return value;
+        }
+        default:
+            delete value;
+            addError(ErrorLogger::Error, "expected value");
+            next();
+            return nullptr;
+    }
+}
+
+
 /* ************************************************************ *
  * ASSEMBLY PARSING                                             *
  * ************************************************************ */
@@ -261,44 +297,20 @@ StatementDef* Parser::doAsmStatement() {
 
 AsmOperand* Parser::doAsmOperand() {
     AsmOperand *op = new AsmOperand;
-    switch(here()->type) {
-        case Integer: {
-            op->type = AsmOperand::Constant;
-            op->value = here()->vInteger;
-            next();
-            return op;
-        }
-        case Float: {
-            op->type = AsmOperand::Constant;
-            op->value = floatAsInt(here()->vFloat);
-            next();
-            return op;
-        }
-        case String: {
-            op->type = AsmOperand::Identifier;
-//            const std::string &s = gamedata.addString(here()->vText);
-            op->text = gamedata.addString(here()->vText);
-            next();
-            return op;
-        }
-        case Identifier: {
-            if (here()->vText == "sp") {
-                op->type = AsmOperand::Stack;
-                next();
-                return op;
-            } else {
-                op->type = AsmOperand::Identifier;
-                op->text = here()->vText;
-                next();
-                return op;
-            }
-        }
-        default:
-            delete op;
-            addError(ErrorLogger::Error, "bad operand type");
-            next();
-            return nullptr;
+
+    if (matches(Identifier) && here()->vText == "sp") {
+        op->isStack = true;
+        next();
+        return op;
     }
+
+    op->value = doValue();
+
+    if (!op->value) {
+        delete op;
+        return nullptr;
+    }
+    return op;
 }
 
 

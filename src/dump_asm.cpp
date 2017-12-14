@@ -5,21 +5,28 @@
 
 class AsmPrinter : public AsmWalker {
 public:
+    virtual void visit(Value *stmt) {
+        switch(stmt->type) {
+            case Value::Constant:
+                std::cout << " c:" << stmt->value;
+                break;
+            case Value::Local:
+                std::cout << " l:" << stmt->value;
+                break;
+            case Value::Identifier:
+                std::cout << " i:~" << stmt->text << '~';
+                break;
+            default:
+                break;
+        }
+}
     virtual void visit(AsmStatement *stmt) {
         std::cout << "asm " << stmt->opname << " (" << std::hex << stmt->opcode << std::dec << ')';
         for (AsmOperand *op : stmt->operands) {
-            switch(op->type) {
-                case AsmOperand::Constant:
-                    std::cout << " c:" << op->value;
-                    break;
-                case AsmOperand::Local:
-                    std::cout << " l:" << op->value;
-                    break;
-                case AsmOperand::Identifier:
-                    std::cout << " i:~" << op->text << '~';
-                    break;
-                default:
-                    break;
+            if (op->isStack) {
+                std::cout << " sp";
+            } else {
+                op->value->accept(this);
             }
         }
         std::cout << '\n';

@@ -66,41 +66,39 @@ std::string GameData::addString(const std::string &text) {
 int AsmOperand::getSize() {
     if (mySize >= 0) return mySize;
 
-    switch (type) {
-        case AsmOperand::Stack:
-            mySize = 0;
-            break;
-        case AsmOperand::Constant:
-            if (value == 0) {
-                mySize = 0;
-                break;
-            }
-            if (value >= -128 && value <= 127) {
-                mySize = 1;
-            } else if (value >= -32768 && value <= 32767) {
-                mySize = 2;
-            } else {
-                mySize = 4;
-            }
-            break;
-        case AsmOperand::Address:
-        case AsmOperand::Local:
-            if (value <= 0xFF) {
-                mySize = 1;
-            } else if (value <= 0xFFFF) {
-                mySize = 2;
-            } else {
-                mySize = 4;
-            }
-            break;
-        case AsmOperand::Identifier:
-            mySize = 4;
-            break;
+    if (isStack) {
+        mySize = 0;
+        return 0;
     }
+
+    if (value->type == Value::Identifier) {
+        mySize = 4;
+    } else if (value->type == Value::Constant && !isIndirect) {
+        if (value == 0) {
+            mySize = 0;
+        } else if (value->value >= -128 && value->value <= 127) {
+            mySize = 1;
+        } else if (value->value >= -32768 && value->value <= 32767) {
+            mySize = 2;
+        } else {
+            mySize = 4;
+        }
+    } else { // indirect access & locals
+        if (value->value <= 0xFF) {
+            mySize = 1;
+        } else if (value->value <= 0xFFFF) {
+            mySize = 2;
+        } else {
+            mySize = 4;
+        }
+    }
+
     return mySize;
 }
 
 int AsmOperand::getMode() {
+    if (isStack) return 8;
+
     int sizeMode = 0;
     switch(getSize()) {
         case 0: sizeMode = 0;   break;
@@ -109,15 +107,17 @@ int AsmOperand::getMode() {
         case 4: sizeMode = 3;   break;
     }
 
-    switch(type) {
-        case AsmOperand::Stack:         return 8;
-        case AsmOperand::Identifier:
-        case AsmOperand::Constant:      return sizeMode;
-        case AsmOperand::Address:       return 4 + sizeMode;
-        case AsmOperand::Local:         return 8 + sizeMode;
+    if (!isIndirect && value->type == Value::Constant && value->value == 0) {
+        return 0;
     }
 
-    return 0;
+    if (isIndirect) {
+        return 4 + sizeMode;
+    } else if (value->type == Value::Local) {
+        return 8 + sizeMode;
+    } else { // Identifier & Constant
+        return sizeMode;
+    }
 }
 
 

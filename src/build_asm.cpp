@@ -11,6 +11,8 @@ public:
     BuildAsm(GameData &gamedata)
     : gamedata(gamedata) { }
 
+    virtual void visit(Value *stmt) {
+    }
     virtual void visit(AsmStatement *stmt) {
         AsmStatement *stmtCopy = new AsmStatement(*stmt);
         stmts.push_back(stmtCopy);
@@ -52,8 +54,7 @@ public:
         retStmt->opname = "return";
         retStmt->opcode = 0x31;
         AsmOperand *retCode = new AsmOperand();
-        retCode->type = AsmOperand::Constant;
-        retCode->value = 0;
+        retCode->value = new Value(0);
         retStmt->operands.push_back(retCode);
         stmts.push_back(retStmt);
     }

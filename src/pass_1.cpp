@@ -10,25 +10,30 @@ public:
     : errors(errors) {
     }
 
+    virtual void visit(Value *stmt) {
+        if (stmt->type == Value::Identifier) {
+            SymbolDef *s = codeBlock->locals.get(stmt->text);
+            if (s) {
+                if (s->type == SymbolDef::Constant) {
+                    stmt->value = s->value;
+                    stmt->type = Value::Constant;
+                } else if (s->type == SymbolDef::Local) {
+                    stmt->value = s->value;
+                    stmt->type = Value::Local;
+                } else if (s->type == SymbolDef::Label) {
+                    stmt->text = "__" + function->name + "__" + stmt->text;
+                }
+            } else {
+                std::stringstream ss;
+                ss << "Undefined symbol " << stmt->text << ".";
+                errors.add(ErrorLogger::Error, "(1st-pass)", 0, 0, ss.str());
+            }
+        }
+    }
     virtual void visit(AsmStatement *stmt) {
         for (AsmOperand *op : stmt->operands) {
-            if (op->type == AsmOperand::Identifier) {
-                SymbolDef *s = codeBlock->locals.get(op->text);
-                if (s) {
-                    if (s->type == SymbolDef::Constant) {
-                        op->value = s->value;
-                        op->type = AsmOperand::Constant;
-                    } else if (s->type == SymbolDef::Local) {
-                        op->value = s->value;
-                        op->type = AsmOperand::Local;
-                    } else if (s->type == SymbolDef::Label) {
-                        op->text = "__" + function->name + "__" + s->name;
-                    }
-                } else {
-                    std::stringstream ss;
-                    ss << "Undefined symbol " << op->text << ".";
-                    errors.add(ErrorLogger::Error, "(1st-pass)", 0, 0, ss.str());
-                }
+            if (!op->isStack) {
+                op->value->accept(this);
             }
         }
     }

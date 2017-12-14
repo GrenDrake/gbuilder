@@ -5,33 +5,29 @@
 
 class PrintAstWalker : public AstWalker {
 public:
-    // virtual void visit(AsmOperandIdentifier *stmt) {
-    //     SymbolDef *symbol = curBlock->locals.get(stmt->value);
-    //     if (symbol) {
-    //         std::cout << ' ' << symbol->type << ':' << symbol->name << '(' << symbol->value << ')';
-    //     } else {
-    //         std::cout << " undef:" << stmt->value;
-    //     }
-    // }
-    // virtual void visit(AsmOperandStack *stmt) {
-    //     std::cout << " SP";
-    // }
+    virtual void visit(Value *stmt) {
+        switch(stmt->type) {
+            case Value::Constant:
+                std::cout << " c:" << stmt->value;
+                break;
+            case Value::Local:
+                std::cout << " l:" << stmt->value;
+                break;
+            case Value::Identifier:
+                std::cout << " i:~" << stmt->text << '~';
+                break;
+            default:
+                break;
+        }
+    }
     virtual void visit(AsmStatement *stmt) {
         spaces();
         std::cout << "ASM  " << stmt->opname << " (" << stmt->opcode << ')';
         for (AsmOperand *op : stmt->operands) {
-            switch(op->type) {
-                case AsmOperand::Constant:
-                    std::cout << " c:" << op->value;
-                    break;
-                case AsmOperand::Local:
-                    std::cout << " l:" << op->value;
-                    break;
-                case AsmOperand::Identifier:
-                    std::cout << " i:~" << op->text << '~';
-                    break;
-                default:
-                    break;
+            if (op->isStack) {
+                std::cout << " sp";
+            } else {
+                op->value->accept(this);
             }
         }
         std::cout << '\n';

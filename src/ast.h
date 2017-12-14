@@ -9,9 +9,11 @@ class CodeBlock;
 class FunctionDef;
 class ReturnDef;
 class LabelStmt;
+class Value;
 
 class AstWalker {
 public:
+    virtual void visit(Value *stmt) = 0;
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(AsmData *stmt) = 0;
     virtual void visit(CodeBlock *stmt) = 0;
@@ -22,6 +24,7 @@ public:
 
 class AsmWalker {
 public:
+    virtual void visit(Value *stmt) = 0;
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(AsmData *stmt) = 0;
     virtual void visit(LabelStmt *stmt) = 0;
@@ -50,15 +53,15 @@ public:
     };
 
     AsmOperand()
-    : type(Constant), value(0), mySize(-1)
+    : value(nullptr), isStack(false), isIndirect(false), mySize(-1)
     { }
 
     int getSize();
     int getMode();
 
-    Type type;
-    int value;
-    std::string text;
+    Value *value;
+    bool isStack;
+    bool isIndirect;
     int mySize;
 };
 class AsmData : public AsmLine {
@@ -143,6 +146,34 @@ public:
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
+};
+
+class Value {
+public:
+    enum Type {
+        Constant, Identifier, Local
+    };
+
+    Value()
+    : type(Constant), value(0)
+    { }
+    Value(int value)
+    : type(Constant),  value(value)
+    { }
+    Value(const std::string &text)
+    : type(Identifier),  text(text)
+    { }
+
+    void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
+    void accept(AsmWalker *walker) {
+        walker->visit(this);
+    }
+
+    Type type;
+    int value;
+    std::string text;
 };
 
 class SymbolDef {
