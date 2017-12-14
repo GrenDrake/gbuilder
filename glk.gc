@@ -20,7 +20,6 @@ function setup_glk() {
         copy 0 sp;
         glk glk_window_open 5 mainWindow;
         jz mainWindow bad_start;
-        label testme;
 
         // glk_set_window
         copy mainWindow sp;
