@@ -13,7 +13,7 @@ void printAST(GameData &gd);
 void dump_asm(std::vector<AsmLine*> lines);
 void doFirstPass(GameData &gd);
 std::vector<AsmLine*> buildAsm(GameData &gd);
-void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile);
+void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile, bool dumpLabels);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
     if (symbols.count(name) > 0) {
@@ -156,11 +156,27 @@ std::string readFile(const std::string &file) {
 int main(int argc, char **argv) {
     ErrorLogger errors;
     GameData gamedata;
+    bool showAST = false;
+    bool showASM = false;
+    bool showLabels = false;
 
-    if (argc != 2) {
-        std::cerr << "USAGE: gbuilder <project-file>\n";
+    if (argc < 2) {
+        std::cerr << "USAGE: gbuilder <project-file> [-ast] [-asm]\n";
         return 1;
     }
+    for (int i = 2; i < argc; ++i) {
+        if (strcmp(argv[i], "-ast") == 0) {
+            showAST = true;
+        } else if (strcmp(argv[i], "-asm") == 0) {
+            showASM = true;
+        } else if (strcmp(argv[i], "-labels") == 0) {
+            showLabels = true;
+        } else {
+            std::cerr << "Unrecognized argument " << argv[i] << "\n";
+            return 1;
+        }
+    }
+
     ProjectFile *pf = load_project(argv[1]);
 
     Lexer lexer(errors);
@@ -184,12 +200,12 @@ int main(int argc, char **argv) {
     }
 
     doFirstPass(gamedata);
-//    printAST(gamedata);
+    if (showAST) printAST(gamedata);
 
 
     auto asmlist = buildAsm(gamedata);
-//    dump_asm(asmlist);
-    build_game(gamedata, asmlist, pf);
+    if (showASM) dump_asm(asmlist);
+    build_game(gamedata, asmlist, pf, showLabels);
 
     delete pf;
     std::cout << "Success!\n";

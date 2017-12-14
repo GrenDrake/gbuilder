@@ -136,7 +136,7 @@ static void writeHeader(GlulxGame &glulx, std::ostream &out) {
     }
 }
 
-void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile) {
+void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile, bool dumpLabels) {
     std::fstream out(projectFile->outputFile, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     GlulxGame gameBuilder(out, lines);
     int lastpos = 256;
@@ -159,11 +159,13 @@ void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFi
     gameBuilder.endOfExtended = lastpos;
 
 
-    std::cout << std::hex;
-    for (auto i : gameBuilder.labels) {
-        std::cout << i.first << " -> " << i.second << '\n';
+    if (dumpLabels) {
+        std::cout << std::hex << std::setfill('0');
+        for (auto i : gameBuilder.labels) {
+            std::cout << std::setw(8) << i.second << ": " << i.first << '\n';
+        }
+        std::cout << std::dec << std::setfill(' ');
     }
-    std::cout << std::dec;
 
     writeHeader(gameBuilder, out);
     for (AsmLine *line : lines) {
@@ -183,5 +185,4 @@ void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFi
     out.clear();
     out.seekp(32);
     writeWord(out, checksum);
-    std::cout << (unsigned)checksum << "\n";
 }
