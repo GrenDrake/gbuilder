@@ -26,7 +26,7 @@ public:
             } else {
                 std::stringstream ss;
                 ss << "Undefined symbol " << stmt->text << ".";
-                errors.add(ErrorLogger::Error, "(1st-pass)", 0, 0, ss.str());
+                errors.add(ErrorLogger::Error, Origin("(1st-pass)", 0, 0), ss.str());
             }
         }
     }

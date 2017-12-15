@@ -86,7 +86,7 @@ void Lexer::doLex(const std::string &sourceFile, const std::string &source_text)
             while (here() != '/' || prev() != '*') {
                 next();
                 if (here() == 0) {
-                    errors.add(ErrorLogger::Error, sourceFile, sline, scol, "unterminated block comment /* */");
+                    errors.add(ErrorLogger::Error, Origin(sourceFile, sline, scol), "unterminated block comment /* */");
                     break;
                 }
             }
@@ -187,7 +187,7 @@ void Lexer::doLex(const std::string &sourceFile, const std::string &source_text)
         } else {
             std::stringstream ss;
             ss << "Unexpected character '" << (char)here() << "' (" << here() << ").";
-            errors.add(ErrorLogger::Error, sourceFile, cLine, cColumn, ss.str());
+            errors.add(ErrorLogger::Error, Origin(sourceFile, cLine, cColumn), ss.str());
             next();
         }
     }
@@ -268,17 +268,17 @@ void Lexer::doCharLiteral() {
     while (here() != 0 && (here() != '\'' || prev() == '\\')) {
         next();
         if (here() == 0) {
-            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated character literal");
+            errors.add(ErrorLogger::Error, t.origin, "unterminated character literal");
         }
     }
 
     std::string rawText = source.substr(start, current-start);
-    unescape(t.line, t.column, rawText);
+    unescape(t.origin, rawText);
     if (rawText.size() == 0) {
-        errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "empty character literal");
+        errors.add(ErrorLogger::Error, t.origin, "empty character literal");
     } else {
         if (rawText.size() > 1) {
-            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "character literal too long");
+            errors.add(ErrorLogger::Error, t.origin, "character literal too long");
         }
         t.vInteger = rawText[0];
     }
@@ -294,12 +294,12 @@ void Lexer::doString() {
     while (here() != 0 && (here() != '"' || prev() == '\\')) {
         next();
         if (here() == 0) {
-            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated string");
+            errors.add(ErrorLogger::Error, t.origin, "unterminated string");
         }
     }
 
     t.vText = source.substr(start, current-start);
-    unescape(t.line, t.column, t.vText);
+    unescape(t.origin, t.vText);
     tokens.push_back(std::move(t));
     next();
 }
@@ -312,7 +312,7 @@ void Lexer::doVocab() {
     while (here() != 0 && here() != '$') {
         next();
         if (here() == 0) {
-            errors.add(ErrorLogger::Error, sourceFile, t.line, t.column, "unterminated vocab word");
+            errors.add(ErrorLogger::Error, t.origin, "unterminated vocab word");
         }
     }
 
@@ -332,14 +332,14 @@ bool Lexer::isIdentifier(int c, bool isInitial) const {
     return false;
 }
 
-void Lexer::unescape(int line, int column, std::string &text) {
+void Lexer::unescape(const Origin &origin, std::string &text) {
     for (unsigned i = 0; i < text.size(); ++i) {
         if (text[i] != '\\') {
             continue;
         }
 
         if (i + 1 >= text.size()) {
-            errors.add(ErrorLogger::Error, sourceFile, line, column, "incomplete escape at end of string");
+            errors.add(ErrorLogger::Error, origin, "incomplete escape at end of string");
             continue;
         }
 
@@ -356,7 +356,7 @@ void Lexer::unescape(int line, int column, std::string &text) {
                 text[i] = '\t';
                 break;
             default:
-                errors.add(ErrorLogger::Error, sourceFile, line, column, "unknown string escape");
+                errors.add(ErrorLogger::Error, origin, "unknown string escape");
                 text[i] = '?';
                 break;
         }

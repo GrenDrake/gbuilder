@@ -49,13 +49,23 @@ enum TokenType {
 };
 const char* tokenTypeName(TokenType type);
 
+class Origin {
+public:
+    Origin(const std::string &file, int line, int column)
+    : file(file), line(line), column(column)
+    { }
+
+    std::string file;
+    int line, column;
+};
+
 class Token {
 public:
     Token()
-    : vInteger(0), vFloat(0.0) {
+    : vInteger(0), vFloat(0.0), origin("(no-file)", 0, 0) {
     }
     Token(const std::string &file, int line, int column, TokenType type)
-    : type(type), vInteger(0), vFloat(0.0), file(file), line(line), column(column) {
+    : type(type), vInteger(0), vFloat(0.0), origin(file,line,column) {
     }
 
     TokenType type;
@@ -63,8 +73,7 @@ public:
     int vInteger;
     double vFloat;
 
-    std::string file;
-    int line, column;
+    Origin origin;
 private:
 };
 
@@ -76,13 +85,12 @@ public:
 
     class Message {
     public:
-        Message(Type type, const std::string &file, int line, int column, const std::string &message)
-        : type(type), file(file), line(line), column(column), message(message) {
+        Message(Type type, const Origin &origin, const std::string &message)
+        : type(type), origin(origin), message(message) {
         }
         std::string format() const;
         const Type type;
-        const std::string file;
-        const int line, column;
+        const Origin origin;
         const std::string message;
     };
 
@@ -90,7 +98,7 @@ public:
     : theErrorCount(0), theWarningCount(0) {
     }
 
-    void add(Type type, const std::string &file, int line, int column, const std::string &message);
+    void add(Type type, const Origin &origin, const std::string &message);
     std::list<Message>::iterator begin() {
         return errors.begin();
     }
@@ -156,7 +164,7 @@ private:
     void doVocab();
 
     bool isIdentifier(int c, bool isInitial = false) const;
-    void unescape(int line, int column, std::string &text);
+    void unescape(const Origin &origin, std::string &text);
 
     int here() const;
     int next();
@@ -203,8 +211,6 @@ private:
     bool symbolExists(const SymbolTable &table, const std::string &name);
     const Token* here();
     const Token* next();
-
-    void addError(ErrorLogger::Type type, const std::string &text);
 
     int current;
     ErrorLogger &errors;

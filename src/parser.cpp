@@ -27,7 +27,7 @@ void Parser::doParse() {
             ss << "unexpected token ";
             ss << tokenTypeName(here()->type);
             ss << ".";
-            addError(ErrorLogger::Error, ss.str());
+            errors.add(ErrorLogger::Error, here()->origin, ss.str());
             next();
         }
 
@@ -128,7 +128,7 @@ StatementDef* Parser::doStatement() {
         ss << "unexpected token ";
         ss << tokenTypeName(here()->type);
         ss << ".";
-        addError(ErrorLogger::Error, ss.str());
+        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), ss.str());
         next();
     }
     return stmt;
@@ -222,7 +222,7 @@ Value* Parser::doValue() {
         }
         default:
             delete value;
-            addError(ErrorLogger::Error, "expected value");
+            errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "expected value");
             next();
             return nullptr;
     }
@@ -274,7 +274,7 @@ StatementDef* Parser::doAsmStatement() {
 
     const AsmCode &ac = opcodeByName(stmt->opname);
     if (ac.name == nullptr) {
-        addError(ErrorLogger::Error, "unknown assembly mnemonic");
+        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "unknown assembly mnemonic");
     } else {
         stmt->opcode = ac.opcode;
         stmt->isRelative = ac.relative;
@@ -288,7 +288,7 @@ StatementDef* Parser::doAsmStatement() {
     }
 
     if (ac.operands != stmt->operands.size()) {
-        addError(ErrorLogger::Error, "bad operand count");
+        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "bad operand count");
     }
 
     if (!expectAdv(Semicolon)) return nullptr;
@@ -320,7 +320,7 @@ bool Parser::expect(TokenType type) {
     }
 
     if (!here()) {
-        addError(ErrorLogger::Error, "Unexpected EOF");
+        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "Unexpected EOF");
         return false;
     }
 
@@ -330,7 +330,7 @@ bool Parser::expect(TokenType type) {
        << " but found "
        << tokenTypeName(here()->type)
        << ".";
-    addError(ErrorLogger::Error, ss.str());
+    errors.add(ErrorLogger::Error, here()->origin, ss.str());
 
     return false;
 }
@@ -357,7 +357,7 @@ bool Parser::expect(const std::string &text) {
     }
 
     if (!here()) {
-        addError(ErrorLogger::Error, "Unexpected EOF");
+        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "Unexpected EOF");
         return false;
     }
 
@@ -365,7 +365,7 @@ bool Parser::expect(const std::string &text) {
     ss << "expected keyword \""
        << text
        << "\".";
-    addError(ErrorLogger::Error, ss.str());
+    errors.add(ErrorLogger::Error, here()->origin, ss.str());
 
     return false;
 }
@@ -387,7 +387,7 @@ bool Parser::symbolExists(const SymbolTable &table, const std::string &name) {
         ss << "symbol "
            << name
            << " already declared.";
-        addError(ErrorLogger::Error, ss.str());
+        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), ss.str());
         return true;
     }
     return false;
@@ -404,12 +404,4 @@ const Token* Parser::here() {
 const Token* Parser::next() {
     ++current;
     return here();
-}
-
-void Parser::addError(ErrorLogger::Type type, const std::string &text) {
-    if (!here()) {
-        errors.add(type, "<unknown>", 0, 0, text);
-    } else {
-        errors.add(type, here()->file, here()->line, here()->column, text);
-    }
 }

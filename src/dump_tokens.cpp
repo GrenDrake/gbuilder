@@ -46,7 +46,7 @@ void dump_tokens(const std::vector<Token> &tokens) {
         } else {
             std::cout << "                    ";
         }
-        std::cout << ' ' << token.file << ':' << token.line << ':' << token.column;
+        std::cout << ' ' << token.origin.file << ':' << token.origin.line << ':' << token.origin.column;
         std::cout << "\n";
     }
     std::cout << std::right;
