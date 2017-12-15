@@ -15,26 +15,27 @@ static int floatAsInt(float initial) {
 
 void Parser::doParse() {
     while (here()) {
-        if (matches(EndOfFile)) {
-            // do nothing
-            next();
-        } else if (matches("constant")) {
-            doConstant();
-        } else if (matches("function")) {
-            FunctionDef *newfunc = doFunction();
-            if (newfunc) {
-                gamedata.functions.push_back(newfunc);
+        try {
+            if (matches(EndOfFile)) {
+                // do nothing
+                next();
+            } else if (matches("constant")) {
+                doConstant();
+            } else if (matches("function")) {
+                FunctionDef *newfunc = doFunction();
+                if (newfunc) {
+                    gamedata.functions.push_back(newfunc);
+                }
+            } else {
+                std::stringstream ss;
+                ss << "unexpected token ";
+                ss << tokenTypeName(here()->type);
+                ss << ".";
+                errors.add(ErrorLogger::Error, here()->origin, ss.str());
+                next();
             }
-        } else {
-            std::stringstream ss;
-            ss << "unexpected token ";
-            ss << tokenTypeName(here()->type);
-            ss << ".";
-            errors.add(ErrorLogger::Error, here()->origin, ss.str());
-            next();
-        }
-
-        if (!errors.empty()) {
+        } catch (ParserError &e) {
+            std::cerr << "Fatal error occured.\n";
             return;
         }
     }
@@ -46,15 +47,15 @@ void Parser::doParse() {
  * ************************************************************ */
 
 void Parser::doConstant() {
-    if (!expect("constant")) return;
+    expect("constant");
 
-    if (!expect(Identifier)) return;
+    expect(Identifier);
     const std::string &name = here()->vText;
     next();
 
     symbolExists(gamedata.symbols, name);
 
-    if (!expectAdv(OpAssign)) return;
+    expectAdv(OpAssign);
 
     if (matches(Integer)) {
         SymbolDef *symbol = new SymbolDef(name, SymbolDef::Constant);
@@ -68,16 +69,15 @@ void Parser::doConstant() {
         next();
     } else {
         expect(Integer);
-        return;
     }
 
-    if (!expectAdv(Semicolon)) return;
+    expectAdv(Semicolon);
 }
 
 FunctionDef* Parser::doFunction() {
     const Origin &origin = here()->origin;
-    if (!expect("function")) return nullptr;
-    if (!expect(Identifier)) return nullptr;
+    expect("function");
+    expect(Identifier);
 
     FunctionDef *newfunc = new FunctionDef;
     newfunc->name = here()->vText;
@@ -118,30 +118,34 @@ FunctionDef* Parser::doFunction() {
 
 StatementDef* Parser::doStatement() {
     StatementDef *stmt = nullptr;
-    if (here()->type == OpenBrace) {
-        stmt = doCodeBlock();
-    } else if (matches("local")) {
-        if (!doLocalsStmt()) return nullptr;
-    } else if (matches("return")) {
-        stmt = doReturn();
-    } else if (matches("label")) {
-        stmt = doLabel();
-    } else if (matches("asm")) {
-        stmt = doAsmBlock();
-    } else {
-        std::stringstream ss;
-        ss << "unexpected token ";
-        ss << tokenTypeName(here()->type);
-        ss << ".";
-        errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), ss.str());
-        next();
+    try {
+        if (here()->type == OpenBrace) {
+            stmt = doCodeBlock();
+        } else if (matches("local")) {
+            if (!doLocalsStmt()) return nullptr;
+        } else if (matches("return")) {
+            stmt = doReturn();
+        } else if (matches("label")) {
+            stmt = doLabel();
+        } else if (matches("asm")) {
+            stmt = doAsmBlock();
+        } else {
+            std::stringstream ss;
+            ss << "unexpected token ";
+            ss << tokenTypeName(here()->type);
+            ss << ".";
+            errors.add(ErrorLogger::Error, here()->origin, ss.str());
+            synchronize();
+        }
+    } catch (ParserError &e) {
+        synchronize();
     }
     return stmt;
 }
 
 CodeBlock* Parser::doCodeBlock() {
     const Origin &origin = here()->origin;
-    if (!expectAdv(OpenBrace)) return nullptr;
+    expectAdv(OpenBrace);
 
     CodeBlock *code = new CodeBlock;
     code->origin = origin;
@@ -163,10 +167,10 @@ CodeBlock* Parser::doCodeBlock() {
 }
 
 bool Parser::doLocalsStmt() {
-    if (!expect("local")) return false;
+    expect("local");
 
     while (true) {
-        if (!expect(Identifier)) return false;
+        expect(Identifier);
         symbolExists(*curTable, here()->vText);
         SymbolDef *sym = new SymbolDef(here()->vText, SymbolDef::Local);
         curTable->add(sym);
@@ -177,16 +181,16 @@ bool Parser::doLocalsStmt() {
             break;
         }
     }
-    if (!expectAdv(Semicolon)) return false;
+    expectAdv(Semicolon);
     return true;
 }
 
 LabelStmt* Parser::doLabel() {
-    if (!expect("label")) return nullptr;
-    if (!expect(Identifier)) return nullptr;
+    expect("label");
+    expect(Identifier);
     const std::string &name = here()->vText;
     next();
-    if (!expectAdv(Semicolon)) return nullptr;
+    expectAdv(Semicolon);
     symbolExists(*curTable, name);
     SymbolDef *sym = new SymbolDef(name, SymbolDef::Label);
     curTable->add(sym, true);
@@ -194,8 +198,8 @@ LabelStmt* Parser::doLabel() {
 }
 
 ReturnDef* Parser::doReturn() {
-    if (!expect("return")) return nullptr;
-    if (!expectAdv(Semicolon)) return nullptr;
+    expect("return");
+    expectAdv(Semicolon);
     return new ReturnDef;
 }
 
@@ -242,14 +246,14 @@ Value* Parser::doValue() {
 
 StatementDef* Parser::doAsmBlock() {
     const Origin &origin = here()->origin;
-    if (!expect("asm")) return nullptr;
+    expect("asm");
 
     if (!matches(OpenBrace)) {
         StatementDef *stmt = doAsmStatement();
         return stmt;
     }
 
-    if (!expectAdv(OpenBrace)) return nullptr;
+    expectAdv(OpenBrace);
     CodeBlock *code = new CodeBlock;
     code->origin = origin;
     code->locals.parent = curTable;
@@ -275,7 +279,6 @@ StatementDef* Parser::doAsmStatement() {
 
     if (!matches(Identifier) && !matches(ReservedWord)) {
         expect(Identifier);
-        return nullptr;
     }
     AsmStatement *stmt = new AsmStatement;
     stmt->opname = here()->vText;
@@ -300,7 +303,7 @@ StatementDef* Parser::doAsmStatement() {
         errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "bad operand count");
     }
 
-    if (!expectAdv(Semicolon)) return nullptr;
+    expectAdv(Semicolon);
     return stmt;
 }
 
@@ -323,14 +326,21 @@ AsmOperand* Parser::doAsmOperand() {
 }
 
 
-bool Parser::expect(TokenType type) {
+void Parser::synchronize() {
+    while(here()->type != Semicolon && here()->type != CloseBrace && here()->type != EndOfFile) {
+        next();
+    }
+    next();
+}
+
+void Parser::expect(TokenType type) {
     if (matches(type)) {
-        return true;
+        return;
     }
 
     if (!here()) {
         errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "Unexpected EOF");
-        return false;
+        throw ParserError();
     }
 
     std::stringstream ss;
@@ -340,16 +350,13 @@ bool Parser::expect(TokenType type) {
        << tokenTypeName(here()->type)
        << ".";
     errors.add(ErrorLogger::Error, here()->origin, ss.str());
-
-    return false;
+    throw ParserError();
 }
 
-bool Parser::expectAdv(TokenType type) {
-    if (expect(type)) {
-        next();
-        return true;
-    }
-    return false;
+void Parser::expectAdv(TokenType type) {
+    expect(type);
+    next();
+    return;
 }
 
 bool Parser::matches(TokenType type) {
@@ -359,15 +366,15 @@ bool Parser::matches(TokenType type) {
     return true;
 }
 
-bool Parser::expect(const std::string &text) {
+void Parser::expect(const std::string &text) {
     if (matches(text)) {
         next();
-        return true;
+        return;
     }
 
     if (!here()) {
         errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "Unexpected EOF");
-        return false;
+        throw ParserError();
     }
 
     std::stringstream ss;
@@ -376,7 +383,7 @@ bool Parser::expect(const std::string &text) {
        << "\".";
     errors.add(ErrorLogger::Error, here()->origin, ss.str());
 
-    return false;
+    throw ParserError();
 }
 
 bool Parser::matches(const std::string &text) {

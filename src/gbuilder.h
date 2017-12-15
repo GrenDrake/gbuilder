@@ -181,6 +181,12 @@ private:
     int cLine, cColumn;
 };
 
+class ParserError : public std::runtime_error {
+public:
+    ParserError()
+    : std::runtime_error("Parser Error")
+    { }
+};
 class Parser {
 public:
     Parser(ErrorLogger &errors, GameData &gamedata, const std::vector<Token> &tokens)
@@ -204,9 +210,10 @@ private:
     StatementDef* doAsmStatement();
     AsmOperand* doAsmOperand();
 
-    bool expect(TokenType type);
-    bool expectAdv(TokenType type);
-    bool expect(const std::string &text);
+    void synchronize();
+    void expect(TokenType type);
+    void expectAdv(TokenType type);
+    void expect(const std::string &text);
     bool matches(TokenType type);
     bool matches(const std::string &text);
     bool symbolExists(const SymbolTable &table, const std::string &name);
