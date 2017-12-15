@@ -11,6 +11,7 @@ const char* tokenTypeName(TokenType type) {
         case Float:                 return "Float";
         case Vocab:                 return "Vocab";
         case ReservedWord:          return "ReservedWord";
+        case EndOfFile:             return "EndOfFile";
 
         case OpPlus:                return "OpPlus";
         case OpMinus:               return "OpMinus";
@@ -191,7 +192,7 @@ void Lexer::doLex(const std::string &sourceFile, const std::string &source_text)
             next();
         }
     }
-
+    doSimpleToken(EndOfFile);
 }
 
 void Lexer::doHexNumber() {

@@ -15,7 +15,10 @@ static int floatAsInt(float initial) {
 
 void Parser::doParse() {
     while (here()) {
-        if (matches("constant")) {
+        if (matches(EndOfFile)) {
+            // do nothing
+            next();
+        } else if (matches("constant")) {
             doConstant();
         } else if (matches("function")) {
             FunctionDef *newfunc = doFunction();

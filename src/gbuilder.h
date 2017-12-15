@@ -13,6 +13,7 @@ enum TokenType {
     Float,
     Vocab,
     ReservedWord,
+    EndOfFile,
 
     OpPlus,
     OpMinus,
