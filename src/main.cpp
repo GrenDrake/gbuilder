@@ -158,6 +158,9 @@ void showErrors(ErrorLogger &errors) {
 
 std::string readFile(const std::string &file) {
     std::ifstream inf(file);
+    if (!inf) {
+        throw std::runtime_error("Could not open file.");
+    }
     std::string content( (std::istreambuf_iterator<char>(inf)),
                          std::istreambuf_iterator<char>() );
     return content;
@@ -206,7 +209,14 @@ int main(int argc, char **argv) {
 
     Lexer lexer(errors);
     for (const std::string &filename : pf->sourceFiles) {
-        std::string source = readFile(filename);
+        std::string source;
+        try {
+            source = readFile(filename);
+        } catch (std::runtime_error &e) {
+            std::cerr << "An error occured while trying to read the file \"" << filename << "\".\n";
+            delete pf;
+            return 1;
+        }
         lexer.doLex(filename, source);
 
         if (!errors.empty()) {

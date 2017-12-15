@@ -1,2 +1,2 @@
-files test.gc "glk.gc hg"
+files test.gc glk.gc
 output output.ulx
