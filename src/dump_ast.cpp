@@ -37,6 +37,8 @@ public:
     virtual void visit(CodeBlock *stmt) {
         spaces();
         std::cout << "BEGIN  ";
+        printOrigin(stmt->origin);
+        std::cout << ' ';
         printSymbols(stmt->locals);
         ++depth;
         for (StatementDef *s : stmt->statements) {

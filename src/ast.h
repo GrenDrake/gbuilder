@@ -211,6 +211,9 @@ public:
 
 class CodeBlock : public StatementDef {
 public:
+    CodeBlock()
+    : origin("(unknown)", 0, 0)
+    { }
     ~CodeBlock() {
         for (StatementDef *stmt : statements) {
             delete stmt;
@@ -221,6 +224,7 @@ public:
     }
     SymbolTable locals;
     std::vector<StatementDef*> statements;
+    Origin origin;
 };
 
 class FunctionDef {

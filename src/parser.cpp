@@ -140,9 +140,11 @@ StatementDef* Parser::doStatement() {
 }
 
 CodeBlock* Parser::doCodeBlock() {
+    const Origin &origin = here()->origin;
     if (!expectAdv(OpenBrace)) return nullptr;
 
     CodeBlock *code = new CodeBlock;
+    code->origin = origin;
     code->locals.parent = curTable;
     while (!matches(CloseBrace)) {
         if (here() == nullptr) {
@@ -239,6 +241,7 @@ Value* Parser::doValue() {
  * ************************************************************ */
 
 StatementDef* Parser::doAsmBlock() {
+    const Origin &origin = here()->origin;
     if (!expect("asm")) return nullptr;
 
     if (!matches(OpenBrace)) {
@@ -248,6 +251,7 @@ StatementDef* Parser::doAsmBlock() {
 
     if (!expectAdv(OpenBrace)) return nullptr;
     CodeBlock *code = new CodeBlock;
+    code->origin = origin;
     code->locals.parent = curTable;
 
 
