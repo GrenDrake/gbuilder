@@ -22,7 +22,7 @@ void Parser::doParse() {
             } else if (matches("constant")) {
                 doConstant();
             } else if (matches("function")) {
-                FunctionDef *newfunc = doFunction();
+                std::shared_ptr<FunctionDef> newfunc(doFunction());
                 if (newfunc) {
                     gamedata.functions.push_back(newfunc);
                 }
@@ -74,12 +74,12 @@ void Parser::doConstant() {
     expectAdv(Semicolon);
 }
 
-FunctionDef* Parser::doFunction() {
+std::shared_ptr<FunctionDef> Parser::doFunction() {
     const Origin &origin = here()->origin;
     expect("function");
     expect(Identifier);
 
-    FunctionDef *newfunc = new FunctionDef;
+    std::shared_ptr<FunctionDef> newfunc(new FunctionDef);
     newfunc->name = here()->vText;
     newfunc->args.parent = &gamedata.symbols;
     newfunc->origin = origin;
@@ -103,11 +103,10 @@ FunctionDef* Parser::doFunction() {
     curTable = &newfunc->args;
     newfunc->code = doCodeBlock();
     if (!newfunc->code) {
-        delete newfunc;
         return nullptr;
     }
     gamedata.symbols.add(new SymbolDef(newfunc->name, SymbolDef::Function));
-    newfunc->code->statements.push_back(new ReturnDef);
+    newfunc->code->statements.push_back(std::shared_ptr<ReturnDef>(new ReturnDef));
     return newfunc;
 }
 
@@ -116,8 +115,8 @@ FunctionDef* Parser::doFunction() {
  * STATEMENT PARSING                                            *
  * ************************************************************ */
 
-StatementDef* Parser::doStatement() {
-    StatementDef *stmt = nullptr;
+ std::shared_ptr<StatementDef> Parser::doStatement() {
+    std::shared_ptr<StatementDef> stmt;
     try {
         if (here()->type == OpenBrace) {
             stmt = doCodeBlock();
@@ -145,21 +144,20 @@ StatementDef* Parser::doStatement() {
     return stmt;
 }
 
-CodeBlock* Parser::doCodeBlock() {
+std::shared_ptr<CodeBlock> Parser::doCodeBlock() {
     const Origin &origin = here()->origin;
     expectAdv(OpenBrace);
 
-    CodeBlock *code = new CodeBlock;
+    std::shared_ptr<CodeBlock> code(new CodeBlock);
     code->origin = origin;
     code->locals.parent = curTable;
     while (!matches(CloseBrace)) {
         if (here() == nullptr) {
-            delete code;
             return nullptr;
         }
 
         curTable = &code->locals;
-        StatementDef *stmt = doStatement();
+        std::shared_ptr<StatementDef> stmt(doStatement());
         if (stmt) {
             code->statements.push_back(stmt);
         }
@@ -187,7 +185,7 @@ bool Parser::doLocalsStmt() {
     return true;
 }
 
-LabelStmt* Parser::doLabel() {
+std::shared_ptr<LabelStmt> Parser::doLabel() {
     expect("label");
     expect(Identifier);
     const std::string &name = here()->vText;
@@ -196,18 +194,18 @@ LabelStmt* Parser::doLabel() {
     symbolExists(*curTable, name);
     SymbolDef *sym = new SymbolDef(name, SymbolDef::Label);
     curTable->add(sym, true);
-    return new LabelStmt(name);
+    return std::shared_ptr<LabelStmt>(new LabelStmt(name));
 }
 
-ReturnDef* Parser::doReturn() {
+std::shared_ptr<ReturnDef> Parser::doReturn() {
     expect("return");
     expectAdv(Semicolon);
-    return new ReturnDef;
+    return std::shared_ptr<ReturnDef>(new ReturnDef);
 }
 
 
-Value* Parser::doValue() {
-    Value *value = new Value;
+std::shared_ptr<Value> Parser::doValue() {
+    std::shared_ptr<Value> value(new Value);
     switch(here()->type) {
         case Integer: {
             value->type = Value::Constant;
@@ -234,7 +232,6 @@ Value* Parser::doValue() {
             return value;
         }
         default:
-            delete value;
             errors.add(ErrorLogger::Error, Origin("(unknown)",0,0), "expected value");
             next();
             return nullptr;
@@ -246,28 +243,26 @@ Value* Parser::doValue() {
  * ASSEMBLY PARSING                                             *
  * ************************************************************ */
 
-StatementDef* Parser::doAsmBlock() {
+ std::shared_ptr<StatementDef> Parser::doAsmBlock() {
     const Origin &origin = here()->origin;
     expect("asm");
 
     if (!matches(OpenBrace)) {
-        StatementDef *stmt = doAsmStatement();
-        return stmt;
+        return doAsmStatement();
     }
 
     expectAdv(OpenBrace);
-    CodeBlock *code = new CodeBlock;
+    std::shared_ptr<CodeBlock> code(new CodeBlock);
     code->origin = origin;
     code->locals.parent = curTable;
 
 
     while (!matches(CloseBrace)) {
         if (here() == nullptr) {
-            delete code;
             return nullptr;
         }
 
-        StatementDef *stmt = doAsmStatement();
+        std::shared_ptr<StatementDef> stmt = doAsmStatement();
         if (stmt) {
             code->statements.push_back(stmt);
         }
@@ -276,13 +271,13 @@ StatementDef* Parser::doAsmBlock() {
     return code;
 }
 
-StatementDef* Parser::doAsmStatement() {
+std::shared_ptr<StatementDef> Parser::doAsmStatement() {
     if (matches("label")) return doLabel();
 
     if (!matches(Identifier) && !matches(ReservedWord)) {
         expect(Identifier);
     }
-    AsmStatement *stmt = new AsmStatement;
+    std::shared_ptr<AsmStatement> stmt(new AsmStatement);
     stmt->opname = here()->vText;
     next();
 
@@ -295,7 +290,7 @@ StatementDef* Parser::doAsmStatement() {
     }
 
     while (!matches(Semicolon)) {
-        AsmOperand *op = doAsmOperand();
+        std::shared_ptr<AsmOperand> op = doAsmOperand();
         if (op) {
             stmt->operands.push_back(op);
         }
@@ -309,8 +304,8 @@ StatementDef* Parser::doAsmStatement() {
     return stmt;
 }
 
-AsmOperand* Parser::doAsmOperand() {
-    AsmOperand *op = new AsmOperand;
+std::shared_ptr<AsmOperand> Parser::doAsmOperand() {
+    std::shared_ptr<AsmOperand> op(new AsmOperand);
 
     if (matches(Identifier) && here()->vText == "sp") {
         op->isStack = true;
@@ -321,7 +316,6 @@ AsmOperand* Parser::doAsmOperand() {
     op->value = doValue();
 
     if (!op->value) {
-        delete op;
         return nullptr;
     }
     return op;

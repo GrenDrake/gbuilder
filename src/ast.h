@@ -59,7 +59,7 @@ public:
     int getSize();
     int getMode();
 
-    Value *value;
+    std::shared_ptr<Value> value;
     bool isStack;
     bool isIndirect;
     int mySize;
@@ -98,9 +98,6 @@ public:
 class AsmStatement : public AsmLine {
 public:
     virtual ~AsmStatement() {
-        for (AsmOperand *op : operands) {
-            delete op;
-        }
     }
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
@@ -114,7 +111,7 @@ public:
     std::string opname;
     int opcode;
     bool isRelative;
-    std::vector<AsmOperand*> operands;
+    std::vector<std::shared_ptr<AsmOperand> > operands;
 };
 
 class LabelStmt : public AsmLine {
@@ -215,15 +212,12 @@ public:
     : origin("(unknown)", 0, 0)
     { }
     ~CodeBlock() {
-        for (StatementDef *stmt : statements) {
-            delete stmt;
-        }
     }
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
     SymbolTable locals;
-    std::vector<StatementDef*> statements;
+    std::vector<std::shared_ptr<StatementDef> > statements;
     Origin origin;
 };
 
@@ -233,7 +227,6 @@ public:
     : localCount(0), origin("(unknown)", 0, 0)
     { }
     ~FunctionDef() {
-        delete code;
     }
     void accept(AstWalker *walker) {
         walker->visit(this);
@@ -241,6 +234,6 @@ public:
     SymbolTable args;
     std::string name;
     int localCount;
-    CodeBlock *code;
+    std::shared_ptr<CodeBlock> code;
     Origin origin;
 };

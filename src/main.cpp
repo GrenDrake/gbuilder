@@ -10,10 +10,10 @@
 #include "gbuilder.h"
 
 void printAST(GameData &gd);
-void dump_asm(std::vector<AsmLine*> lines);
+void dump_asm(std::vector<std::shared_ptr<AsmLine> > lines);
 void doFirstPass(GameData &gd, ErrorLogger &errors);
-std::vector<AsmLine*> buildAsm(GameData &gd);
-void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile, bool dumpLabels);
+std::vector<std::shared_ptr<AsmLine> > buildAsm(GameData &gd);
+void build_game(GameData &gamedata, std::vector<std::shared_ptr<AsmLine> > lines, const ProjectFile *projectFile, bool dumpLabels);
 void dump_tokens(const std::vector<Token> &tokens);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
@@ -141,7 +141,7 @@ int AsmStatement::getSize() const {
     }
 
     // size of operands
-    for (AsmOperand *op : operands) {
+    for (auto op : operands) {
         size += op->getSize();
     }
 

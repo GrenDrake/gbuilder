@@ -23,7 +23,7 @@ public:
     virtual void visit(AsmStatement *stmt) {
         spaces();
         std::cout << "ASM  " << stmt->opname << " (" << stmt->opcode << ')';
-        for (AsmOperand *op : stmt->operands) {
+        for (auto op : stmt->operands) {
             if (op->isStack) {
                 std::cout << " sp";
             } else {
@@ -41,7 +41,7 @@ public:
         std::cout << ' ';
         printSymbols(stmt->locals);
         ++depth;
-        for (StatementDef *s : stmt->statements) {
+        for (auto s : stmt->statements) {
             curBlock = stmt;
             s->accept(this);
         }
@@ -117,7 +117,7 @@ void printAST(GameData &gd) {
 
     PrintAstWalker aw;
     std::cout << "\nFUNCTIONS: " << gd.functions.size() << '\n';
-    for (FunctionDef *f : gd.functions) {
+    for (auto f : gd.functions) {
         f->accept(&aw);
     }
 

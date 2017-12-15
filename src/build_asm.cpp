@@ -14,22 +14,22 @@ public:
     virtual void visit(Value *stmt) {
     }
     virtual void visit(AsmStatement *stmt) {
-        AsmStatement *stmtCopy = new AsmStatement(*stmt);
+        std::shared_ptr<AsmStatement> stmtCopy(new AsmStatement(*stmt));
         stmts.push_back(stmtCopy);
     }
     virtual void visit(AsmData *stmt) {
-        AsmData *stmtCopy = new AsmData(*stmt);
+        std::shared_ptr<AsmData> stmtCopy(new AsmData(*stmt));
         stmts.push_back(stmtCopy);
     }
     virtual void visit(CodeBlock *stmt) {
-        for (StatementDef *s : stmt->statements) {
+        for (auto s : stmt->statements) {
             s->accept(this);
         }
     }
     virtual void visit(FunctionDef *stmt) {
-        LabelStmt *funcLabel = new LabelStmt(stmt->name);
+        std::shared_ptr<LabelStmt> funcLabel(new LabelStmt(stmt->name));
         stmts.push_back(funcLabel);
-        AsmData *funcHeader = new AsmData();
+        std::shared_ptr<AsmData> funcHeader(new AsmData());
         funcHeader->data.push_back(0xC1);
         int locals = stmt->localCount;
         while (locals >= 255) {
@@ -50,22 +50,22 @@ public:
         }
     }
     virtual void visit(ReturnDef *stmt) {
-        AsmStatement *retStmt = new AsmStatement();
+        std::shared_ptr<AsmStatement> retStmt(new AsmStatement());
         retStmt->opname = "return";
         retStmt->opcode = 0x31;
-        AsmOperand *retCode = new AsmOperand();
-        retCode->value = new Value(0);
+        std::shared_ptr<AsmOperand> retCode(new AsmOperand());
+        retCode->value = std::shared_ptr<Value>(new Value(0));
         retStmt->operands.push_back(retCode);
         stmts.push_back(retStmt);
     }
     virtual void visit(LabelStmt *stmt) {
-        LabelStmt *stmtCopy = new LabelStmt(*stmt);
+        std::shared_ptr<LabelStmt> stmtCopy(new LabelStmt(*stmt));
         stmts.push_back(stmtCopy);
     }
 
     void buildStrings() {
         for (const auto &strdef : gamedata.stringtable) {
-            LabelStmt *strLabel = new LabelStmt(strdef.first);
+            std::shared_ptr<LabelStmt> strLabel(new LabelStmt(strdef.first));
             stmts.push_back(strLabel);
 
             bool isUnicode = false;
@@ -75,7 +75,7 @@ public:
                 }
             }
 
-            AsmData *strData = new AsmData;
+            std::shared_ptr<AsmData> strData(new AsmData);
             if (isUnicode) {
                 strData->data.push_back(0xE2);
                 strData->data.push_back(0);
@@ -99,20 +99,20 @@ public:
         }
     }
 
-    std::vector<AsmLine*> stmts;
+    std::vector<std::shared_ptr<AsmLine> > stmts;
 private:
     GameData &gamedata;
 };
 
 
 
-std::vector<AsmLine*> buildAsm(GameData &gd) {
+std::vector<std::shared_ptr<AsmLine> > buildAsm(GameData &gd) {
 
     BuildAsm buildAsmWalker(gd);
 
     buildAsmWalker.buildStrings();
 
-    for (FunctionDef *f : gd.functions) {
+    for (auto f : gd.functions) {
         f->accept(&buildAsmWalker);
     }
 

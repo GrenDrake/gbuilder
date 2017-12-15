@@ -1,5 +1,6 @@
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -129,13 +130,10 @@ public:
     : nextString(0) {
     }
     ~GameData() {
-        for (FunctionDef *f : functions) {
-            delete f;
-        }
     }
     std::string addString(const std::string &text);
 
-    std::list<FunctionDef*> functions;
+    std::list<std::shared_ptr<FunctionDef> > functions;
     std::set<std::string> vocabRaw;
     std::map<std::string, std::string> stringtable;
     SymbolTable symbols;
@@ -196,19 +194,19 @@ public:
     void doParse();
 private:
     void doConstant();
-    FunctionDef* doFunction();
+    std::shared_ptr<FunctionDef> doFunction();
 
-    StatementDef* doStatement();
-    CodeBlock* doCodeBlock();
+    std::shared_ptr<StatementDef> doStatement();
+    std::shared_ptr<CodeBlock> doCodeBlock();
     bool doLocalsStmt();
-    LabelStmt* doLabel();
-    ReturnDef* doReturn();
+    std::shared_ptr<LabelStmt> doLabel();
+    std::shared_ptr<ReturnDef> doReturn();
 
-    Value* doValue();
+    std::shared_ptr<Value> doValue();
 
-    StatementDef* doAsmBlock();
-    StatementDef* doAsmStatement();
-    AsmOperand* doAsmOperand();
+    std::shared_ptr<StatementDef> doAsmBlock();
+    std::shared_ptr<StatementDef> doAsmStatement();
+    std::shared_ptr<AsmOperand> doAsmOperand();
 
     void synchronize();
     void expect(TokenType type);

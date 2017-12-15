@@ -44,7 +44,7 @@ public:
         }
 
         int curMode = -1;
-        for (AsmOperand *op : stmt->operands) {
+        for (auto op : stmt->operands) {
             int mode = op->getMode();
             if (curMode < 0) {
                 curMode = mode;
@@ -60,7 +60,7 @@ public:
         }
 
         for (int i = 0; i < stmt->operands.size(); ++i) {
-            AsmOperand *op = stmt->operands[i];
+            std::shared_ptr<AsmOperand> op = stmt->operands[i];
             if (op->isStack) continue;
             int value = op->value->value;
             if (op->value->type == Value::Identifier) {
@@ -86,7 +86,7 @@ public:
         // do nothing
     }
 
-    GlulxGame(std::ostream &out, std::vector<AsmLine*> &lines)
+    GlulxGame(std::ostream &out, std::vector<std::shared_ptr<AsmLine> > &lines)
     : lines(lines), out(out)
     { }
 
@@ -95,7 +95,7 @@ public:
     int endOfExtended;
     int stackSize;
     std::unordered_map<std::string, int> labels;
-    std::vector<AsmLine*> &lines;
+    std::vector<std::shared_ptr<AsmLine> > &lines;
     std::ostream &out;
 
 };
@@ -139,14 +139,14 @@ static void writeHeader(GlulxGame &glulx, std::ostream &out) {
     }
 }
 
-void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile, bool dumpLabels) {
+void build_game(GameData &gamedata, std::vector<std::shared_ptr<AsmLine> > lines, const ProjectFile *projectFile, bool dumpLabels) {
     std::fstream out(projectFile->outputFile, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     GlulxGame gameBuilder(out, lines);
     int lastpos = 256;
 
-    for (AsmLine *line : lines) {
+    for (auto line : lines) {
         line->pos = lastpos;
-        LabelStmt *label = dynamic_cast<LabelStmt*>(line);
+        std::shared_ptr<LabelStmt> label = std::dynamic_pointer_cast<LabelStmt>(line);
         if (label) {
             gameBuilder.labels[label->name] = label->pos;
         }
@@ -171,7 +171,7 @@ void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFi
     }
 
     writeHeader(gameBuilder, out);
-    for (AsmLine *line : lines) {
+    for (auto line : lines) {
         line->accept(&gameBuilder);
     }
 

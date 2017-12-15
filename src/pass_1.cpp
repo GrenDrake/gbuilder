@@ -31,7 +31,7 @@ public:
         }
     }
     virtual void visit(AsmStatement *stmt) {
-        for (AsmOperand *op : stmt->operands) {
+        for (auto op : stmt->operands) {
             if (!op->isStack) {
                 op->value->accept(this);
             }
@@ -43,7 +43,7 @@ public:
         numberLocals(stmt->locals);
         int localCount = locals;
         int maxLocals = locals;
-        for (StatementDef *s : stmt->statements) {
+        for (auto s : stmt->statements) {
            locals = localCount;
            codeBlock = stmt;
             s->accept(this);
@@ -96,7 +96,7 @@ private:
 void doFirstPass(GameData &gd, ErrorLogger &errors) {
 
     FirstPassWalker fpw(errors);
-    for (FunctionDef *f : gd.functions) {
+    for (auto f : gd.functions) {
         f->accept(&fpw);
     }
 

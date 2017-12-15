@@ -22,7 +22,7 @@ public:
 }
     virtual void visit(AsmStatement *stmt) {
         std::cout << "asm " << stmt->opname << " (" << std::hex << stmt->opcode << std::dec << ')';
-        for (AsmOperand *op : stmt->operands) {
+        for (auto op : stmt->operands) {
             if (op->isStack) {
                 std::cout << " sp";
             } else {
@@ -44,11 +44,11 @@ public:
 };
 
 
-void dump_asm(std::vector<AsmLine*> lines) {
+void dump_asm(std::vector<std::shared_ptr<AsmLine> > lines) {
     AsmPrinter asmPrinter;
 
     std::cout << "** Assembly Dump **\n";
-    for (AsmLine *line : lines) {
+    for (auto line : lines) {
         line->accept(&asmPrinter);
     }
 }
