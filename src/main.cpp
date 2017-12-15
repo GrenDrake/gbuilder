@@ -190,7 +190,19 @@ int main(int argc, char **argv) {
         }
     }
 
+
     ProjectFile *pf = load_project(argv[1]);
+    if (pf->sourceFiles.empty()) {
+        std::cerr << "No source files specified!\n";
+        delete pf;
+        return 1;
+    }
+    std::cout << "Input files:";
+    for (const std::string &file : pf->sourceFiles) {
+        std::cout << ' ' << file;
+    }
+    std::cout << "\nTarget: " << pf->outputFile << "\n";
+
 
     Lexer lexer(errors);
     for (const std::string &filename : pf->sourceFiles) {

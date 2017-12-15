@@ -7,6 +7,10 @@
 
 class ProjectFile {
 public:
+    ProjectFile()
+    : stackSize(2048), extraMemory(0), outputFile("output.ulx")
+    { }
+
     int stackSize;
     int extraMemory;
     std::vector<std::string> sourceFiles;
