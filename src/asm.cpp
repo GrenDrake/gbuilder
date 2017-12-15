@@ -24,7 +24,7 @@ static AsmCode codes[] = {
     AsmCode("protect",       0x127, 2),
     AsmCode("getstringtbl",  0x140, 1),
     AsmCode("setstringtbl",  0x141, 1),
-    
+
     AsmCode("linearsearch",  0x150, 8),
     AsmCode("binarysearch",  0x151, 8),
     AsmCode("linkedsearch",  0x152, 7),
@@ -152,4 +152,89 @@ const AsmCode& opcodeByName(const std::string &name) {
         }
     }
     return codes[0];
+}
+
+
+int AsmOperand::getSize() {
+    if (mySize >= 0) return mySize;
+
+    if (isStack) {
+        mySize = 0;
+        return 0;
+    }
+
+    if (value->type == Value::Identifier) {
+        mySize = 4;
+    } else if (value->type == Value::Constant && !isIndirect) {
+        if (value == 0) {
+            mySize = 0;
+        } else if (value->value >= -128 && value->value <= 127) {
+            mySize = 1;
+        } else if (value->value >= -32768 && value->value <= 32767) {
+            mySize = 2;
+        } else {
+            mySize = 4;
+        }
+    } else { // indirect access & locals
+        if (value->value <= 0xFF) {
+            mySize = 1;
+        } else if (value->value <= 0xFFFF) {
+            mySize = 2;
+        } else {
+            mySize = 4;
+        }
+    }
+
+    return mySize;
+}
+
+int AsmOperand::getMode() {
+    if (isStack) return 8;
+
+    int sizeMode = 0;
+    switch(getSize()) {
+        case 0: sizeMode = 0;   break;
+        case 1: sizeMode = 1;   break;
+        case 2: sizeMode = 2;   break;
+        case 4: sizeMode = 3;   break;
+    }
+
+    if (!isIndirect && value->type == Value::Constant && value->value == 0) {
+        return 0;
+    }
+
+    if (isIndirect) {
+        return 4 + sizeMode;
+    } else if (value->type == Value::Local) {
+        return 8 + sizeMode;
+    } else { // Identifier & Constant
+        return sizeMode;
+    }
+}
+
+
+int AsmStatement::getSize() const {
+    int size = 0;
+
+    // size of opcode
+    if (opcode > 0x3FFF) {
+        size += 4;
+    } else if (opcode > 0x7F) {
+        size += 2;
+    } else {
+        size += 1;
+    }
+
+    // size of addressing modes
+    size += operands.size() / 2;
+    if (operands.size() % 2) {
+        ++size;
+    }
+
+    // size of operands
+    for (auto op : operands) {
+        size += op->getSize();
+    }
+
+    return size;
 }
