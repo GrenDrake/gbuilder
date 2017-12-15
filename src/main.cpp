@@ -14,6 +14,7 @@ void dump_asm(std::vector<AsmLine*> lines);
 void doFirstPass(GameData &gd, ErrorLogger &errors);
 std::vector<AsmLine*> buildAsm(GameData &gd);
 void build_game(GameData &gamedata, std::vector<AsmLine*> lines, const ProjectFile *projectFile, bool dumpLabels);
+void dump_tokens(const std::vector<Token> &tokens);
 
 SymbolDef* SymbolTable::get(const std::string &name) {
     if (symbols.count(name) > 0) {
@@ -168,6 +169,7 @@ int main(int argc, char **argv) {
     bool showAST = false;
     bool showASM = false;
     bool showLabels = false;
+    bool showTokens = false;
 
     if (argc < 2) {
         std::cerr << "USAGE: gbuilder <project-file> [-ast] [-asm]\n";
@@ -180,6 +182,8 @@ int main(int argc, char **argv) {
             showASM = true;
         } else if (strcmp(argv[i], "-labels") == 0) {
             showLabels = true;
+        } else if (strcmp(argv[i], "-tokens") == 0) {
+            showTokens = true;
         } else {
             std::cerr << "Unrecognized argument " << argv[i] << "\n";
             return 1;
@@ -198,6 +202,10 @@ int main(int argc, char **argv) {
             delete pf;
             return 1;
         }
+    }
+
+    if (showTokens) {
+        dump_tokens(lexer.getTokens());
     }
 
     Parser parser(errors, gamedata, lexer.getTokens());
