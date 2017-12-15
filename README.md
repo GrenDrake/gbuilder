@@ -8,8 +8,17 @@ GBuilder is an alternative compiler used for creating [Glulx](http://www.eblong.
 ./gbuilder <project-file>
 ```
 
-The project file contains two lines. The first is a whitespace separated list of all the files to compile and the second is the name of the output file.
+Each line of the project file begin with the name of an option. This is followed by a whitespace delimited list of values for that option. The currently available options are:
 
+- **files** A list of source files to include in the compilation
+- **output** The name of the glulx game file to create (defaults to "output.ulx")
+
+At a minimum, the project file must have at least one files directive with at least one source file listed. An example project file is shown below:
+
+```
+files source1.gc source2.gc
+output mygame.ulx
+```
 
 ## Language Grammar
 
