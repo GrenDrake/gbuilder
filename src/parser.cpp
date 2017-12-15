@@ -75,12 +75,14 @@ void Parser::doConstant() {
 }
 
 FunctionDef* Parser::doFunction() {
+    const Origin &origin = here()->origin;
     if (!expect("function")) return nullptr;
     if (!expect(Identifier)) return nullptr;
 
     FunctionDef *newfunc = new FunctionDef;
     newfunc->name = here()->vText;
     newfunc->args.parent = &gamedata.symbols;
+    newfunc->origin = origin;
     next();
     expectAdv(OpenParan);
     if (matches(Identifier)) {

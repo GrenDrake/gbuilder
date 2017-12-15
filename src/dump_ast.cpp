@@ -51,6 +51,8 @@ public:
         depth = 0;
         std::cout << "\nFUNCTION " << stmt->name;
         std::cout << " (locals: " << stmt->localCount << ") ";
+        printOrigin(stmt->origin);
+        std::cout << ' ';
         printSymbols(stmt->args);
         if (stmt->code) {
             stmt->code->accept(this);
@@ -68,6 +70,9 @@ public:
     }
 
 private:
+    void printOrigin(const Origin &origin) {
+        std::cout << "[" << origin.file << ":" << origin.line << ":" << origin.column << "]";
+    }
     void printSymbols(SymbolTable &symbols) {
         std::cout << "(" << symbols.symbols.size() << ":";
         for (auto &s : symbols.symbols) {

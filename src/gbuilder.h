@@ -4,6 +4,16 @@
 #include <string>
 #include <vector>
 
+class Origin {
+public:
+    Origin(const std::string &file, int line, int column)
+    : file(file), line(line), column(column)
+    { }
+
+    std::string file;
+    int line, column;
+};
+
 #include "ast.h"
 
 enum TokenType {
@@ -49,16 +59,6 @@ enum TokenType {
     Question
 };
 const char* tokenTypeName(TokenType type);
-
-class Origin {
-public:
-    Origin(const std::string &file, int line, int column)
-    : file(file), line(line), column(column)
-    { }
-
-    std::string file;
-    int line, column;
-};
 
 class Token {
 public:

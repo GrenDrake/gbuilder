@@ -225,6 +225,9 @@ public:
 
 class FunctionDef {
 public:
+    FunctionDef()
+    : localCount(0), origin("(unknown)", 0, 0)
+    { }
     ~FunctionDef() {
         delete code;
     }
@@ -235,4 +238,5 @@ public:
     std::string name;
     int localCount;
     CodeBlock *code;
+    Origin origin;
 };
