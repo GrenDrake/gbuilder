@@ -129,6 +129,8 @@ StatementDef* Parser::doStatement() {
             stmt = doLabel();
         } else if (matches("asm")) {
             stmt = doAsmBlock();
+        } else if (matches(Semicolon)) {
+            next();
         } else {
             std::stringstream ss;
             ss << "unexpected token ";
