@@ -19,8 +19,7 @@ function main() {
         streamchar '\n';
     }
 
-    return;
-
+    return 6;
 }
 
 function verify() {

@@ -106,7 +106,12 @@ std::shared_ptr<FunctionDef> Parser::doFunction() {
         return nullptr;
     }
     gamedata.symbols.add(new SymbolDef(newfunc->name, SymbolDef::Function));
-    newfunc->code->statements.push_back(std::shared_ptr<ReturnDef>(new ReturnDef));
+
+    std::shared_ptr<LiteralExpression> retValue(new LiteralExpression);
+    retValue->litValue = 0;
+    std::shared_ptr<ReturnDef> defaultReturn(new ReturnDef);
+    defaultReturn->retValue = retValue;
+    newfunc->code->statements.push_back(defaultReturn);
     return newfunc;
 }
 
@@ -199,10 +204,41 @@ std::shared_ptr<LabelStmt> Parser::doLabel() {
 
 std::shared_ptr<ReturnDef> Parser::doReturn() {
     expect("return");
+    std::shared_ptr<ReturnDef> returnStmt(new ReturnDef);
+    if (!matches(Semicolon)) {
+        returnStmt->retValue = doExpression();
+    } else {
+        std::shared_ptr<LiteralExpression> retValue(new LiteralExpression);
+        retValue->litValue = 0;
+        returnStmt->retValue = retValue;
+    }
     expectAdv(Semicolon);
-    return std::shared_ptr<ReturnDef>(new ReturnDef);
+    return returnStmt;
 }
 
+std::shared_ptr<ExpressionDef> Parser::doExpression() {
+    std::shared_ptr<ExpressionDef> expr;
+    if (matches(Integer)) {
+        std::shared_ptr<LiteralExpression> realExpr(new LiteralExpression);
+        realExpr->litValue = here()->vInteger;
+        expr = realExpr;
+        next();
+    } else if (matches(Identifier)) {
+        std::shared_ptr<NameExpression> realExpr(new NameExpression);
+        realExpr->name = here()->vText;
+        expr = realExpr;
+        next();
+    } else {
+        std::stringstream ss;
+        ss << "unexpected token ";
+        ss << tokenTypeName(here()->type);
+        ss << ".";
+        errors.add(ErrorLogger::Error, here()->origin, ss.str());
+        synchronize();
+        return nullptr;
+    }
+    return expr;
+}
 
 std::shared_ptr<Value> Parser::doValue() {
     std::shared_ptr<Value> value(new Value);

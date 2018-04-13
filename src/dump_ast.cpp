@@ -2,6 +2,19 @@
 
 #include "gbuilder.h"
 
+class PrintExpressionWalker : public ExpressionWalker {
+    virtual void visit(NameExpression *expr) {
+        std::cout << "$" << expr->name;
+    }
+
+    virtual void visit(LiteralExpression *expr) {
+        std::cout << "#" << expr->litValue;
+    }
+
+    virtual void visit(PrefixOpExpression *expr) {
+
+    }
+};
 
 class PrintAstWalker : public AstWalker {
 public:
@@ -64,7 +77,10 @@ public:
     }
     virtual void visit(ReturnDef *stmt) {
         spaces();
-        std::cout << "RETURN 0\n";
+        std::cout << "RETURN ";
+        PrintExpressionWalker ewalk;
+        stmt->retValue->accept(&ewalk);
+        std::cout << "\n";
     }
     virtual void visit(LabelStmt *stmt) {
         spaces();

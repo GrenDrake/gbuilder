@@ -24,11 +24,11 @@ output mygame.ulx
 
 ```
 IDENTIFIER -> [a-zA-Z_][a-zA-Z0-9_]*
-INTEGER -> [0-9]* 
-         | 0[xX][0-9a-fA-F] 
+INTEGER -> [0-9]*
+         | 0[xX][0-9a-fA-F]
          | '.'
 FLOAT -> [0-9]+\.[0-9]*
-NUMBER -> INTEGER 
+NUMBER -> INTEGER
         | FLOAT
 
 program -> (top-level)*
@@ -38,12 +38,14 @@ constant-def -> "constant" IDENTIFIER "=" INTEGER ";"
 
 function-def -> "function" [IDENTIFIER] "(" (IDENTIFIER ("," IDENTIFIER)*)? ")" code-block
 code-block -> "{" statement* "}"
-statement -> asm-block 
+statement -> asm-block
            | return-statement
 
-return-statement -> "return" ";"
+return-statement -> "return" expression-def ";"
 
-asm-block -> "asm" "{" asm-statement* "}" 
+expression-def -> IDENTIFIER | INTEGER
+
+asm-block -> "asm" "{" asm-statement* "}"
            | "asm" asm-statement
 asm-statement -> IDENTIFIER asm-operand* ";"
 asm-operand -> NUMBER | IDENTIFIER

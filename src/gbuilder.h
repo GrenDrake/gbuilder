@@ -201,7 +201,7 @@ private:
     bool doLocalsStmt();
     std::shared_ptr<LabelStmt> doLabel();
     std::shared_ptr<ReturnDef> doReturn();
-
+    std::shared_ptr<ExpressionDef> doExpression();
     std::shared_ptr<Value> doValue();
 
     std::shared_ptr<StatementDef> doAsmBlock();

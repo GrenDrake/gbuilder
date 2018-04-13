@@ -10,6 +10,10 @@ class FunctionDef;
 class ReturnDef;
 class LabelStmt;
 class Value;
+class NameExpression;
+class LiteralExpression;
+class ExpressionDef;
+class PrefixOpExpression;
 
 class AstWalker {
 public:
@@ -28,6 +32,13 @@ public:
     virtual void visit(AsmStatement *stmt) = 0;
     virtual void visit(AsmData *stmt) = 0;
     virtual void visit(LabelStmt *stmt) = 0;
+};
+
+class ExpressionWalker {
+public:
+    virtual void visit(NameExpression *expr) = 0;
+    virtual void visit(LiteralExpression *expr) = 0;
+    virtual void visit(PrefixOpExpression *expr) = 0;
 };
 
 class StatementDef {
@@ -143,6 +154,41 @@ public:
     virtual void accept(AstWalker *walker) {
         walker->visit(this);
     }
+
+    std::shared_ptr<ExpressionDef> retValue;
+};
+
+class ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) = 0;
+};
+class NameExpression : public ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) {
+        walker->visit(this);
+    }
+    std::string name;
+};
+class LiteralExpression : public ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) {
+        walker->visit(this);
+    }
+    int litValue;
+};
+class PrefixOpExpression : public ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) {
+        walker->visit(this);
+    }
+    std::shared_ptr<ExpressionDef> right;
+    int opType;
+};
+class InfixOpExpression : public ExpressionDef {
+public:
+    std::shared_ptr<ExpressionDef> left;
+    std::shared_ptr<ExpressionDef> right;
+    int opType;
 };
 
 class Value {

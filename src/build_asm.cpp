@@ -5,6 +5,41 @@
 
 #include "gbuilder.h"
 
+class BuildExpr : public ExpressionWalker {
+public:
+    BuildExpr(std::vector<std::shared_ptr<AsmLine> > &stmts, GameData &gamedata)
+    : stmts(stmts), gamedata(gamedata)
+    { }
+
+    void visit(NameExpression *expr) {
+
+    }
+
+    void visit(LiteralExpression *expr) {
+        std::cout << "XXX\n";
+        std::shared_ptr<AsmStatement> opCopy(new AsmStatement());
+        opCopy->opname = "copy";
+        opCopy->opcode = 0x40;
+
+        std::shared_ptr<AsmOperand> litValue(new AsmOperand());
+        litValue->value = std::shared_ptr<Value>(new Value(expr->litValue));
+        opCopy->operands.push_back(litValue);
+
+        std::shared_ptr<AsmOperand> destPos(new AsmOperand());
+        destPos->isStack = true;
+        opCopy->operands.push_back(destPos);
+
+        stmts.push_back(opCopy);
+    }
+
+    void visit(PrefixOpExpression *expr) {
+
+    }
+
+    std::vector<std::shared_ptr<AsmLine> > &stmts;
+private:
+    GameData &gamedata;
+};
 
 class BuildAsm : public AstWalker {
 public:
@@ -50,11 +85,15 @@ public:
         }
     }
     virtual void visit(ReturnDef *stmt) {
+        BuildExpr bExpr(stmts, gamedata);
+        stmt->retValue->accept(&bExpr);
+
         std::shared_ptr<AsmStatement> retStmt(new AsmStatement());
         retStmt->opname = "return";
         retStmt->opcode = 0x31;
         std::shared_ptr<AsmOperand> retCode(new AsmOperand());
-        retCode->value = std::shared_ptr<Value>(new Value(0));
+        // retCode->value = std::shared_ptr<Value>(new Value(0));
+        retCode->isStack = true;
         retStmt->operands.push_back(retCode);
         stmts.push_back(retStmt);
     }
