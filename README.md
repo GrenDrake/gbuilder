@@ -39,6 +39,7 @@ constant-def -> "constant" IDENTIFIER "=" INTEGER ";"
 function-def -> "function" [IDENTIFIER] "(" (IDENTIFIER ("," IDENTIFIER)*)? ")" code-block
 code-block -> "{" statement* "}"
 statement -> asm-block
+           | expression-def ";"
            | return-statement
 
 return-statement -> "return" expression-def ";"

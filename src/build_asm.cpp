@@ -97,6 +97,24 @@ public:
         retStmt->operands.push_back(retCode);
         stmts.push_back(retStmt);
     }
+    virtual void visit(ExpressionStmt *stmt) {
+        BuildExpr bExpr(stmts, gamedata);
+        stmt->expr->accept(&bExpr);
+
+        std::shared_ptr<AsmStatement> retStmt(new AsmStatement());
+        retStmt->opname = "copy";
+        retStmt->opcode = 0x40;
+
+        std::shared_ptr<AsmOperand> retCode(new AsmOperand());
+        retCode->isStack = true;
+        retStmt->operands.push_back(retCode);
+
+        std::shared_ptr<AsmOperand> op2(new AsmOperand());
+        op2->value = std::shared_ptr<Value>(new Value(0));
+        retStmt->operands.push_back(op2);
+
+        stmts.push_back(retStmt);
+    }
     virtual void visit(LabelStmt *stmt) {
         std::shared_ptr<LabelStmt> stmtCopy(new LabelStmt(*stmt));
         stmts.push_back(stmtCopy);

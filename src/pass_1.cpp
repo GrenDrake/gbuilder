@@ -70,6 +70,8 @@ public:
     }
     virtual void visit(ReturnDef *stmt) {
     }
+    virtual void visit(ExpressionStmt *stmt) {
+    }
     virtual void visit(LabelStmt *stmt) {
         stmt->name = "__" + function->name + "__" + stmt->name;
     }

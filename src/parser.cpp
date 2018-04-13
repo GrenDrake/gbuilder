@@ -136,12 +136,13 @@ std::shared_ptr<FunctionDef> Parser::doFunction() {
         } else if (matches(Semicolon)) {
             next();
         } else {
-            std::stringstream ss;
-            ss << "unexpected token ";
-            ss << tokenTypeName(here()->type);
-            ss << ".";
-            errors.add(ErrorLogger::Error, here()->origin, ss.str());
-            synchronize();
+            stmt = doExpressionStmt();
+            // std::stringstream ss;
+            // ss << "unexpected token ";
+            // ss << tokenTypeName(here()->type);
+            // ss << ".";
+            // errors.add(ErrorLogger::Error, here()->origin, ss.str());
+            // synchronize();
         }
     } catch (ParserError &e) {
         synchronize();
@@ -238,6 +239,12 @@ std::shared_ptr<ExpressionDef> Parser::doExpression() {
         return nullptr;
     }
     return expr;
+}
+
+std::shared_ptr<ExpressionStmt> Parser::doExpressionStmt() {
+    std::shared_ptr<ExpressionStmt> stmt(new ExpressionStmt);
+    stmt->expr = doExpression();
+    return stmt;
 }
 
 std::shared_ptr<Value> Parser::doValue() {

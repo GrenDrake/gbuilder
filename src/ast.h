@@ -9,6 +9,7 @@ class CodeBlock;
 class FunctionDef;
 class ReturnDef;
 class LabelStmt;
+class ExpressionStmt;
 class Value;
 class NameExpression;
 class LiteralExpression;
@@ -19,6 +20,7 @@ class AstWalker {
 public:
     virtual void visit(Value *stmt) = 0;
     virtual void visit(AsmStatement *stmt) = 0;
+    virtual void visit(ExpressionStmt *stmt) = 0;
     virtual void visit(AsmData *stmt) = 0;
     virtual void visit(CodeBlock *stmt) = 0;
     virtual void visit(FunctionDef *stmt) = 0;
@@ -46,6 +48,17 @@ public:
     virtual ~StatementDef() {
     }
     virtual void accept(AstWalker *walker) = 0;
+};
+
+class ExpressionStmt : public StatementDef {
+public:
+    virtual ~ExpressionStmt() {
+    }
+    virtual void accept(AstWalker *walker) {
+        walker->visit(this);
+    }
+
+    std::shared_ptr<ExpressionDef> expr;
 };
 
 class AsmLine : public StatementDef {

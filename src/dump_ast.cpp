@@ -82,6 +82,13 @@ public:
         stmt->retValue->accept(&ewalk);
         std::cout << "\n";
     }
+    virtual void visit(ExpressionStmt *stmt) {
+        spaces();
+        std::cout << "STMT ";
+        PrintExpressionWalker ewalk;
+        stmt->expr->accept(&ewalk);
+        std::cout << "\n";
+    }
     virtual void visit(LabelStmt *stmt) {
         spaces();
         std::cout << "LABEL ~" << stmt->name << "~\n";
