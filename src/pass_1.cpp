@@ -3,6 +3,39 @@
 
 #include "gbuilder.h"
 
+class FirstPastExpressions : public ExpressionWalker {
+public:
+    FirstPastExpressions(ErrorLogger &errors, CodeBlock *block, FunctionDef *function)
+    : errors(errors), block(block), function(function)
+    { }
+
+    virtual void visit(LiteralExpression *stmt) {
+    }
+    virtual void visit(NameExpression *stmt) {
+        SymbolDef *s = block->locals.get(stmt->name);
+        if (s) {
+            if (s->type == SymbolDef::Constant) {
+                stmt->value.value = s->value;
+                stmt->value.type = Value::Constant;
+            } else if (s->type == SymbolDef::Local) {
+                stmt->value.value = s->value;
+                stmt->value.type = Value::Local;
+            } else if (s->type == SymbolDef::Label) {
+                stmt->value.text = "__" + function->name + "__" + stmt->value.text;
+            }
+        } else {
+            std::stringstream ss;
+            ss << "Undefined symbol " << stmt->value.text << ".";
+            errors.add(ErrorLogger::Error, Origin("(1st-pass)", 0, 0), ss.str());
+        }
+    }
+    virtual void visit(PrefixOpExpression *stmt) {
+    }
+
+    ErrorLogger &errors;
+    CodeBlock *block;
+    FunctionDef *function;
+};
 
 class FirstPassWalker : public AstWalker {
 public:
@@ -69,8 +102,12 @@ public:
         stmt->localCount = maxLocals;
     }
     virtual void visit(ReturnDef *stmt) {
+        FirstPastExpressions walker(errors, codeBlock, function);
+        stmt->retValue->accept(&walker);
     }
     virtual void visit(ExpressionStmt *stmt) {
+        FirstPastExpressions walker(errors, codeBlock, function);
+        stmt->expr->accept(&walker);
     }
     virtual void visit(LabelStmt *stmt) {
         stmt->name = "__" + function->name + "__" + stmt->name;

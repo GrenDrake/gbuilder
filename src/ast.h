@@ -171,39 +171,6 @@ public:
     std::shared_ptr<ExpressionDef> retValue;
 };
 
-class ExpressionDef {
-public:
-    virtual void accept(ExpressionWalker *walker) = 0;
-};
-class NameExpression : public ExpressionDef {
-public:
-    virtual void accept(ExpressionWalker *walker) {
-        walker->visit(this);
-    }
-    std::string name;
-};
-class LiteralExpression : public ExpressionDef {
-public:
-    virtual void accept(ExpressionWalker *walker) {
-        walker->visit(this);
-    }
-    int litValue;
-};
-class PrefixOpExpression : public ExpressionDef {
-public:
-    virtual void accept(ExpressionWalker *walker) {
-        walker->visit(this);
-    }
-    std::shared_ptr<ExpressionDef> right;
-    int opType;
-};
-class InfixOpExpression : public ExpressionDef {
-public:
-    std::shared_ptr<ExpressionDef> left;
-    std::shared_ptr<ExpressionDef> right;
-    int opType;
-};
-
 class Value {
 public:
     enum Type {
@@ -231,6 +198,41 @@ public:
     int value;
     std::string text;
 };
+
+class ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) = 0;
+};
+class NameExpression : public ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) {
+        walker->visit(this);
+    }
+    std::string name;
+    Value value;
+};
+class LiteralExpression : public ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) {
+        walker->visit(this);
+    }
+    int litValue;
+};
+class PrefixOpExpression : public ExpressionDef {
+public:
+    virtual void accept(ExpressionWalker *walker) {
+        walker->visit(this);
+    }
+    std::shared_ptr<ExpressionDef> right;
+    int opType;
+};
+class InfixOpExpression : public ExpressionDef {
+public:
+    std::shared_ptr<ExpressionDef> left;
+    std::shared_ptr<ExpressionDef> right;
+    int opType;
+};
+
 
 class SymbolDef {
 public:

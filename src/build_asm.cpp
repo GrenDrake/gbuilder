@@ -12,7 +12,32 @@ public:
     { }
 
     void visit(NameExpression *expr) {
+        std::cout << "XXX\n";
+        std::shared_ptr<AsmStatement> opCopy(new AsmStatement());
+        opCopy->opname = "copy";
+        opCopy->opcode = 0x40;
 
+        std::shared_ptr<AsmOperand> litValue;
+        switch(expr->value.type) {
+            case Value::Constant:
+                litValue.reset(new AsmOperand());
+                litValue->value = std::shared_ptr<Value>(new Value(expr->value.value));
+                opCopy->operands.push_back(litValue);
+                break;
+            case Value::Local:
+                litValue.reset(new AsmOperand());
+                litValue->value = std::shared_ptr<Value>(new Value(expr->value));
+                opCopy->operands.push_back(litValue);
+                break;
+            case Value::Identifier:
+                break;
+        }
+
+        std::shared_ptr<AsmOperand> destPos(new AsmOperand());
+        destPos->isStack = true;
+        opCopy->operands.push_back(destPos);
+
+        stmts.push_back(opCopy);
     }
 
     void visit(LiteralExpression *expr) {
