@@ -30,7 +30,7 @@ void Parser::doParse() {
                 std::stringstream ss;
                 ss << "unexpected token ";
                 ss << tokenTypeName(here()->type);
-                ss << ".";
+                ss << " at top level.";
                 errors.add(ErrorLogger::Error, here()->origin, ss.str());
                 next();
             }
@@ -137,12 +137,6 @@ std::shared_ptr<FunctionDef> Parser::doFunction() {
             next();
         } else {
             stmt = doExpressionStmt();
-            // std::stringstream ss;
-            // ss << "unexpected token ";
-            // ss << tokenTypeName(here()->type);
-            // ss << ".";
-            // errors.add(ErrorLogger::Error, here()->origin, ss.str());
-            // synchronize();
         }
     } catch (ParserError &e) {
         synchronize();
@@ -233,7 +227,7 @@ std::shared_ptr<ExpressionDef> Parser::doExpression() {
         std::stringstream ss;
         ss << "unexpected token ";
         ss << tokenTypeName(here()->type);
-        ss << ".";
+        ss << " in expression.";
         errors.add(ErrorLogger::Error, here()->origin, ss.str());
         synchronize();
         return nullptr;
