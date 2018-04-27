@@ -12,7 +12,6 @@ public:
     { }
 
     void visit(NameExpression *expr) {
-        std::cout << "XXX\n";
         std::shared_ptr<AsmStatement> opCopy(new AsmStatement());
         opCopy->opname = "copy";
         opCopy->opcode = 0x40;
@@ -41,7 +40,6 @@ public:
     }
 
     void visit(LiteralExpression *expr) {
-        std::cout << "XXX\n";
         std::shared_ptr<AsmStatement> opCopy(new AsmStatement());
         opCopy->opname = "copy";
         opCopy->opcode = 0x40;
