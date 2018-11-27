@@ -55,7 +55,7 @@ void Parser::doConstant() {
 
     symbolExists(gamedata.symbols, name);
 
-    expectAdv(OpAssign);
+    expectAdv(Assignment);
 
     if (matches(Integer)) {
         SymbolDef *symbol = new SymbolDef(name, SymbolDef::Constant);

@@ -201,6 +201,7 @@ public:
 
 class ExpressionDef {
 public:
+    virtual ~ExpressionDef() {};
     virtual void accept(ExpressionWalker *walker) = 0;
 };
 class NameExpression : public ExpressionDef {

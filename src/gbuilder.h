@@ -17,6 +17,33 @@ public:
 
 #include "ast.h"
 
+enum class OperatorType {
+    Plus,
+    Minus,
+    Divide,
+    Multiply,
+    Power,
+    PlusEquals,
+    MinusEquals,
+    DivideEquals,
+    MultiplyEquals,
+    Not,
+    Modulus,
+    Property,
+    Increment,
+    Decrement,
+
+    LessThan,
+    LessThanOrEquals,
+    GreaterThan,
+    GreaterThanOrEquals,
+    NotEquals,
+    Equals,
+    LogicalAnd,
+    LogicalOr
+};
+const char* operatorName(OperatorType type);
+
 enum TokenType {
     Identifier,
     String,
@@ -26,30 +53,8 @@ enum TokenType {
     ReservedWord,
     EndOfFile,
 
-    OpPlus,
-    OpMinus,
-    OpDivide,
-    OpMultiply,
-    OpPower,
-    OpPlusEquals,
-    OpMinusEquals,
-    OpDivideEquals,
-    OpMultiplyEquals,
-    OpNot,
-    OpModulus,
-    OpAssign,
-    OpProperty,
-    OpIncrement,
-    OpDecrement,
-
-    LessThan,
-    LessThanOrEquals,
-    GreaterThan,
-    GreaterThanOrEquals,
-    NotEquals,
-    Equals,
-    LogicalAnd,
-    LogicalOr,
+    Operator,
+    Assignment,
 
     OpenBrace,
     CloseBrace,
@@ -70,10 +75,16 @@ public:
     : type(type), vInteger(0), vFloat(0.0), origin(file,line,column) {
     }
 
+    Token(const std::string &file, int line, int column, OperatorType type)
+    : type(TokenType::Operator), vInteger(0), vFloat(0.0),
+      opType(type), origin(file,line,column) {
+    }
+
     TokenType type;
     std::string vText;
     int vInteger;
     double vFloat;
+    OperatorType opType;
 
     Origin origin;
 private:
@@ -157,6 +168,7 @@ private:
     void doIdentifier();
     void doHexNumber();
     void doNumber();
+    void doOperatorToken(OperatorType type, int length);
     void doSimpleToken(TokenType type);
     void doSimpleToken2(TokenType type);
     void doString();

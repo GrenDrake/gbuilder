@@ -3,6 +3,35 @@
 
 #include "gbuilder.h"
 
+const char* operatorName(OperatorType type) {
+    switch(type) {
+        case OperatorType::Plus:                return "OpPlus";
+        case OperatorType::Minus:               return "OpMinus";
+        case OperatorType::Divide:              return "OpDivide";
+        case OperatorType::Multiply:            return "OpMultiply";
+        case OperatorType::Power:               return "OpPower";
+        case OperatorType::Not:                 return "OpNot";
+        case OperatorType::Modulus:             return "OpModulus";
+        case OperatorType::Property:            return "OpProperty";
+        case OperatorType::PlusEquals:          return "OpPlusEquals";
+        case OperatorType::MinusEquals:         return "OpMinusEquals";
+        case OperatorType::DivideEquals:        return "OpDivideEquals";
+        case OperatorType::MultiplyEquals:      return "OpMultiplyEquals";
+        case OperatorType::Increment:           return "OpIncrement";
+        case OperatorType::Decrement:           return "OpDecrement";
+
+        case OperatorType::LessThan:            return "LessThan";
+        case OperatorType::LessThanOrEquals:    return "LessThanOrEquals";
+        case OperatorType::GreaterThan:         return "GreaterThan";
+        case OperatorType::GreaterThanOrEquals: return "GreaterThanOrEquals";
+        case OperatorType::NotEquals:           return "NotEquals";
+        case OperatorType::Equals:              return "Equals";
+
+        case OperatorType::LogicalAnd:          return "LogicalAnd";
+        case OperatorType::LogicalOr:           return "LogicalOr";
+    }
+}
+
 const char* tokenTypeName(TokenType type) {
     switch(type) {
         case Identifier:            return "Identifier";
@@ -13,28 +42,8 @@ const char* tokenTypeName(TokenType type) {
         case ReservedWord:          return "ReservedWord";
         case EndOfFile:             return "EndOfFile";
 
-        case OpPlus:                return "OpPlus";
-        case OpMinus:               return "OpMinus";
-        case OpDivide:              return "OpDivide";
-        case OpMultiply:            return "OpMultiply";
-        case OpPower:               return "OpPower";
-        case OpNot:                 return "OpNot";
-        case OpModulus:             return "OpModulus";
-        case OpAssign:              return "OpAssign";
-        case OpProperty:            return "OpProperty";
-        case OpPlusEquals:          return "OpPlusEquals";
-        case OpMinusEquals:         return "OpMinusEquals";
-        case OpDivideEquals:        return "OpDivideEquals";
-        case OpMultiplyEquals:      return "OpMultiplyEquals";
-        case OpIncrement:           return "OpIncrement";
-        case OpDecrement:           return "OpDecrement";
-
-        case LessThan:              return "LessThan";
-        case LessThanOrEquals:      return "LessThanOrEquals";
-        case GreaterThan:           return "GreaterThan";
-        case GreaterThanOrEquals:   return "GreaterThanOrEquals";
-        case NotEquals:             return "NotEquals";
-        case Equals:                return "Equals";
+        case Operator:              return "OpAssign";
+        case Assignment:            return "OpAssign";
 
         case OpenBrace:             return "OpenBrace";
         case CloseBrace:            return "CloseBrace";
@@ -43,9 +52,6 @@ const char* tokenTypeName(TokenType type) {
         case Semicolon:             return "Semicolon";
         case Comma:                 return "Comma";
         case Question:              return "Question";
-
-        case LogicalAnd:            return "LogicalAnd";
-        case LogicalOr:             return "LogicalOr";
 
         default:                    return "unnamed token";
     }
@@ -106,62 +112,62 @@ void Lexer::doLex(const std::string &sourceFile, const std::string &source_text)
 
         } else if (here() == '+') {
             if (peek() == '=') {
-                doSimpleToken2(OpPlusEquals);
+                doOperatorToken(OperatorType::PlusEquals, 2);
             } else if (peek() == '+') {
-                doSimpleToken2(OpIncrement);
+                doOperatorToken(OperatorType::Increment, 2);
             } else {
-                doSimpleToken(OpPlus);
+                doOperatorToken(OperatorType::Plus, 1);
             }
         } else if (here() == '-') {
             if (peek() == '=') {
-                doSimpleToken2(OpMinusEquals);
+                doOperatorToken(OperatorType::MinusEquals, 2);
             } else if (peek() == '-') {
-                doSimpleToken2(OpDecrement);
+                doOperatorToken(OperatorType::Decrement, 2);
             } else {
-                doSimpleToken(OpMinus);
+                doOperatorToken(OperatorType::Minus, 1);
             }
         } else if (here() == '/') {
             if (peek() == '=') {
-                doSimpleToken2(OpDivideEquals);
+                doOperatorToken(OperatorType::DivideEquals, 2);
             } else {
-                doSimpleToken(OpDivide);
+                doOperatorToken(OperatorType::Divide, 1);
             }
         } else if (here() == '*') {
             if (peek() == '=') {
-                doSimpleToken2(OpDivideEquals);
+                doOperatorToken(OperatorType::MultiplyEquals, 2);
             } else {
-                doSimpleToken(OpMultiply);
+                doOperatorToken(OperatorType::Multiply, 1);
             }
         } else if (here() == '=') {
             if (peek() == '=') {
-                doSimpleToken2(Equals);
+                doOperatorToken(OperatorType::Equals, 2);
             } else {
-                doSimpleToken(OpAssign);
+                doSimpleToken(Assignment);
             }
         } else if (here() == '%') {
-            doSimpleToken(OpModulus);
+                doOperatorToken(OperatorType::Modulus, 1);
         } else if (here() == '!') {
             if (peek() == '=') {
-                doSimpleToken2(NotEquals);
+                doOperatorToken(OperatorType::NotEquals, 2);
             } else {
-                doSimpleToken(OpNot);
+                doOperatorToken(OperatorType::Not, 1);
             }
         } else if (here() == '^') {
-            doSimpleToken(OpPower);
+            doOperatorToken(OperatorType::Power, 1);
         } else if (here() == '.') {
-            doSimpleToken(OpProperty);
+                doOperatorToken(OperatorType::Property, 1);
 
         } else if (here() == '<') {
             if (peek() == '=') {
-                doSimpleToken2(LessThanOrEquals);
+                doOperatorToken(OperatorType::LessThanOrEquals, 2);
             } else {
-                doSimpleToken(LessThan);
+                doOperatorToken(OperatorType::LessThan, 1);
             }
         } else if (here() == '>') {
             if (peek() == '=') {
-                doSimpleToken2(GreaterThanOrEquals);
+                doOperatorToken(OperatorType::GreaterThanOrEquals, 2);
             } else {
-                doSimpleToken(GreaterThan);
+                doOperatorToken(OperatorType::GreaterThan, 1);
             }
         } else if (here() == ',') {
             doSimpleToken(Comma);
@@ -169,9 +175,9 @@ void Lexer::doLex(const std::string &sourceFile, const std::string &source_text)
             doSimpleToken(Question);
 
         } else if (here() == '&' && peek() == '&') {
-            doSimpleToken2(LogicalAnd);
+            doOperatorToken(OperatorType::LogicalAnd, 2);
         } else if (here() == '|' && peek() == '|') {
-            doSimpleToken2(LogicalAnd);
+                doOperatorToken(OperatorType::LogicalOr, 2);
 
         } else if (isIdentifier(here(), true)) {
             doIdentifier();
@@ -250,6 +256,10 @@ void Lexer::doIdentifier() {
     tokens.push_back(std::move(t));
 }
 
+void Lexer::doOperatorToken(OperatorType type, int length) {
+    tokens.push_back(Token(sourceFile, cLine, cColumn, type));
+    while (length > 0) --length;
+}
 void Lexer::doSimpleToken(TokenType type) {
     tokens.push_back(Token(sourceFile, cLine, cColumn, type));
     next();
