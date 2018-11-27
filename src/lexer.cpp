@@ -115,7 +115,7 @@ void Lexer::doLex(const std::string &sourceFile, const std::string &source_text)
         } else if (here() == '-') {
             if (peek() == '=') {
                 doSimpleToken2(OpMinusEquals);
-            } else if (peek() == '+') {
+            } else if (peek() == '-') {
                 doSimpleToken2(OpDecrement);
             } else {
                 doSimpleToken(OpMinus);
